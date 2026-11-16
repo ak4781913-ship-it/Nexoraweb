@@ -1,0 +1,343 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Core primitives
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isBootstrapAdmin() {
+      return isVerified() && request.auth.token.email == 'khanabs1512@gmail.com';
+    }
+
+    function isAdmin() {
+      return isBootstrapAdmin() || (
+        isVerified() &&
+        exists(/databases/$(database)/documents/administrators/$(request.auth.uid))
+      );
+    }
+
+    function isSuperAdmin() {
+      return isBootstrapAdmin() || (
+        isVerified() &&
+        exists(/databases/$(database)/documents/administrators/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/administrators/$(request.auth.uid)).data.role == 'Super Admin'
+      );
+    }
+
+    function isReqStr(val, minLen, maxLen) {
+      return val is string && val.size() >= minLen && val.size() <= maxLen;
+    }
+
+    function isOptStr(val, maxLen) {
+      return val is string && val.size() <= maxLen;
+    }
+
+    function isHttpUrlOrEmpty(val, maxLen) {
+      return val is string && val.size() <= maxLen && (
+        val.size() == 0 ||
+        val.matches('^https?://.*')
+      );
+    }
+
+    function isAssetUrlOrEmpty(val, maxLen) {
+      return val is string && val.size() <= maxLen && (
+        val.size() == 0 ||
+        val.matches('^https?://.*') ||
+        val.matches('^/[^/].*')
+      );
+    }
+
+    function isSlug(val, maxLen) {
+      return val is string && val.size() >= 2 && val.size() <= maxLen && val.matches('^[a-z0-9]+(?:-[a-z0-9]+)*$');
+    }
+
+    function isStringList(val, maxItems) {
+      return val is list && val.size() <= maxItems && (val.size() == 0 || val[0] is string);
+    }
+
+    function isPublicProductStatus(status) {
+      return status in ['Live', 'Coming Soon', 'Under Development'];
+    }
+
+    // Validation blueprints
+    function isValidProduct(data) {
+      return data.keys().hasAll([
+        'name', 'slug', 'shortDescription', 'fullDescription', 'logoUrl', 'coverImageUrl',
+        'screenshotGallery', 'categoryId', 'categoryName', 'tags', 'features', 'benefits',
+        'officialWebsiteUrl', 'productType', 'pricingType', 'supportedPlatforms', 'launchDate',
+        'featured', 'displayOrder', 'seoTitle', 'seoDescription', 'publicationStatus',
+        'createdAt', 'updatedAt'
+      ])
+      && data.keys().hasOnly([
+        'name', 'slug', 'shortDescription', 'fullDescription', 'logoUrl', 'coverImageUrl',
+        'screenshotGallery', 'categoryId', 'categoryName', 'tags', 'features', 'benefits',
+        'officialWebsiteUrl', 'productType', 'pricingType', 'supportedPlatforms', 'launchDate',
+        'featured', 'displayOrder', 'seoTitle', 'seoDescription', 'publicationStatus',
+        'createdAt', 'updatedAt'
+      ])
+      && isReqStr(data.name, 2, 120)
+      && isSlug(data.slug, 120)
+      && isReqStr(data.shortDescription, 2, 280)
+      && isOptStr(data.fullDescription, 15000)
+      && isAssetUrlOrEmpty(data.logoUrl, 2000)
+      && isAssetUrlOrEmpty(data.coverImageUrl, 2000)
+      && isStringList(data.screenshotGallery, 12)
+      && isReqStr(data.categoryId, 1, 120)
+      && isReqStr(data.categoryName, 1, 120)
+      && isStringList(data.tags, 15)
+      && isStringList(data.features, 25)
+      && isStringList(data.benefits, 25)
+      && isHttpUrlOrEmpty(data.officialWebsiteUrl, 1000)
+      && data.productType in ['Website', 'Web Application', 'Mobile Application', 'AI Tool', 'Online Service', 'Digital Platform']
+      && data.pricingType in ['Free', 'Freemium', 'Premium']
+      && isStringList(data.supportedPlatforms, 12)
+      && isOptStr(data.launchDate, 40)
+      && data.featured is bool
+      && (data.displayOrder is int || data.displayOrder is float) && data.displayOrder >= 0 && data.displayOrder <= 100000
+      && isOptStr(data.seoTitle, 140)
+      && isOptStr(data.seoDescription, 320)
+      && data.publicationStatus in ['Draft', 'Coming Soon', 'Live', 'Under Development', 'Archived']
+      && data.createdAt is timestamp
+      && data.updatedAt is timestamp;
+    }
+
+    function isValidCategory(data) {
+      return data.keys().hasAll([
+        'name', 'slug', 'icon', 'imageUrl', 'description', 'displayOrder',
+        'publicationStatus', 'createdAt', 'updatedAt'
+      ])
+      && data.keys().hasOnly([
+        'name', 'slug', 'icon', 'imageUrl', 'description', 'displayOrder',
+        'publicationStatus', 'createdAt', 'updatedAt'
+      ])
+      && isReqStr(data.name, 2, 80)
+      && isSlug(data.slug, 80)
+      && isReqStr(data.icon, 1, 40)
+      && isAssetUrlOrEmpty(data.imageUrl, 2000)
+      && isOptStr(data.description, 400)
+      && (data.displayOrder is int || data.displayOrder is float) && data.displayOrder >= 0 && data.displayOrder <= 100000
+      && data.publicationStatus in ['Published', 'Hidden']
+      && data.createdAt is timestamp
+      && data.updatedAt is timestamp;
+    }
+
+    function isValidUpdate(data) {
+      return data.keys().hasAll([
+        'title', 'slug', 'summary', 'content', 'type', 'relatedProductSlug',
+        'coverImageUrl', 'publishedAt', 'publicationStatus', 'createdAt', 'updatedAt'
+      ])
+      && data.keys().hasOnly([
+        'title', 'slug', 'summary', 'content', 'type', 'relatedProductSlug',
+        'coverImageUrl', 'publishedAt', 'publicationStatus', 'createdAt', 'updatedAt'
+      ])
+      && isReqStr(data.title, 2, 160)
+      && isSlug(data.slug, 160)
+      && isReqStr(data.summary, 2, 400)
+      && isOptStr(data.content, 15000)
+      && data.type in ['Product Launch', 'Platform Update', 'Announcement', 'Roadmap']
+      && isOptStr(data.relatedProductSlug, 120)
+      && isAssetUrlOrEmpty(data.coverImageUrl, 2000)
+      && isOptStr(data.publishedAt, 40)
+      && data.publicationStatus in ['Published', 'Draft']
+      && data.createdAt is timestamp
+      && data.updatedAt is timestamp;
+    }
+
+    function isValidContactMessage(data) {
+      return data.keys().hasAll([
+        'name', 'email', 'subject', 'message', 'status', 'honeypot', 'createdAt', 'updatedAt'
+      ])
+      && data.keys().hasOnly([
+        'name', 'email', 'subject', 'message', 'status', 'honeypot', 'createdAt', 'updatedAt'
+      ])
+      && isReqStr(data.name, 2, 100)
+      && isReqStr(data.email, 5, 150)
+      && data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
+      && isReqStr(data.subject, 2, 160)
+      && isReqStr(data.message, 10, 4000)
+      && data.status in ['New', 'Read', 'Replied', 'Archived']
+      && data.honeypot is string && data.honeypot.size() == 0
+      && data.createdAt is timestamp
+      && data.updatedAt is timestamp;
+    }
+
+    function isValidSiteSettings(data) {
+      return data.keys().hasAll([
+        'brandName', 'tagline', 'brandLogoUrl', 'brandDescription',
+        'aboutMission', 'aboutVision', 'aboutStory', 'defaultTheme',
+        'seoTitle', 'seoDescription', 'contactEmail', 'contactLocation',
+        'socialGithub', 'socialX', 'socialLinkedin', 'socialYoutube', 'updatedAt'
+      ])
+      && data.keys().hasOnly([
+        'brandName', 'tagline', 'brandLogoUrl', 'brandDescription',
+        'aboutMission', 'aboutVision', 'aboutStory', 'defaultTheme',
+        'seoTitle', 'seoDescription', 'contactEmail', 'contactLocation',
+        'socialGithub', 'socialX', 'socialLinkedin', 'socialYoutube', 'updatedAt'
+      ])
+      && isReqStr(data.brandName, 2, 60)
+      && isOptStr(data.tagline, 200)
+      && isAssetUrlOrEmpty(data.brandLogoUrl, 2000)
+      && isOptStr(data.brandDescription, 1000)
+      && isOptStr(data.aboutMission, 2000)
+      && isOptStr(data.aboutVision, 2000)
+      && isOptStr(data.aboutStory, 8000)
+      && data.defaultTheme in ['light', 'dark', 'system']
+      && isOptStr(data.seoTitle, 120)
+      && isOptStr(data.seoDescription, 320)
+      && isOptStr(data.contactEmail, 150)
+      && isOptStr(data.contactLocation, 160)
+      && isHttpUrlOrEmpty(data.socialGithub, 500)
+      && isHttpUrlOrEmpty(data.socialX, 500)
+      && isHttpUrlOrEmpty(data.socialLinkedin, 500)
+      && isHttpUrlOrEmpty(data.socialYoutube, 500)
+      && data.updatedAt is timestamp;
+    }
+
+    function isValidAdministrator(data) {
+      return data.keys().hasAll(['email', 'displayName', 'role', 'createdAt'])
+      && data.keys().hasOnly(['email', 'displayName', 'role', 'createdAt'])
+      && isReqStr(data.email, 5, 150)
+      && data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
+      && isReqStr(data.displayName, 1, 100)
+      && data.role in ['Super Admin', 'Editor']
+      && data.createdAt is timestamp;
+    }
+
+    // Collection: products
+    match /products/{productId} {
+      allow get: if isValidId(productId) && (isPublicProductStatus(existing().publicationStatus) || isAdmin());
+      allow list: if isPublicProductStatus(existing().publicationStatus) || isAdmin();
+      allow create: if isAdmin()
+        && isValidId(productId)
+        && isValidProduct(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isAdmin()
+        && isValidId(productId)
+        && isValidProduct(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'name', 'slug', 'shortDescription', 'fullDescription', 'logoUrl', 'coverImageUrl',
+          'screenshotGallery', 'categoryId', 'categoryName', 'tags', 'features', 'benefits',
+          'officialWebsiteUrl', 'productType', 'pricingType', 'supportedPlatforms', 'launchDate',
+          'featured', 'displayOrder', 'seoTitle', 'seoDescription', 'publicationStatus', 'updatedAt'
+        ]);
+      allow delete: if isAdmin() && isValidId(productId);
+    }
+
+    // Collection: categories
+    match /categories/{categoryId} {
+      allow get: if isValidId(categoryId) && (existing().publicationStatus == 'Published' || isAdmin());
+      allow list: if existing().publicationStatus == 'Published' || isAdmin();
+      allow create: if isAdmin()
+        && isValidId(categoryId)
+        && isValidCategory(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isAdmin()
+        && isValidId(categoryId)
+        && isValidCategory(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'name', 'slug', 'icon', 'imageUrl', 'description', 'displayOrder', 'publicationStatus', 'updatedAt'
+        ]);
+      allow delete: if isAdmin() && isValidId(categoryId);
+    }
+
+    // Collection: updates
+    match /updates/{updateId} {
+      allow get: if isValidId(updateId) && (existing().publicationStatus == 'Published' || isAdmin());
+      allow list: if existing().publicationStatus == 'Published' || isAdmin();
+      allow create: if isAdmin()
+        && isValidId(updateId)
+        && isValidUpdate(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isAdmin()
+        && isValidId(updateId)
+        && isValidUpdate(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'title', 'slug', 'summary', 'content', 'type', 'relatedProductSlug',
+          'coverImageUrl', 'publishedAt', 'publicationStatus', 'updatedAt'
+        ]);
+      allow delete: if isAdmin() && isValidId(updateId);
+    }
+
+    // Collection: contactMessages (strict PII isolation)
+    match /contactMessages/{messageId} {
+      allow get: if isValidId(messageId) && isAdmin();
+      allow list: if isAdmin();
+      allow create: if isValidId(messageId)
+        && isValidContactMessage(incoming())
+        && incoming().status == 'New'
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isAdmin()
+        && isValidId(messageId)
+        && isValidContactMessage(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']);
+      allow delete: if isAdmin() && isValidId(messageId);
+    }
+
+    // Collection: siteSettings
+    match /siteSettings/{settingId} {
+      allow get: if isValidId(settingId) && (settingId == 'global' || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isAdmin()
+        && settingId == 'global'
+        && isValidSiteSettings(incoming())
+        && incoming().updatedAt == request.time;
+      allow update: if isAdmin()
+        && settingId == 'global'
+        && isValidSiteSettings(incoming())
+        && incoming().updatedAt == request.time;
+      allow delete: if false;
+    }
+
+    // Collection: administrators (RBAC roster - Super Admin managed only, never self-creatable)
+    match /administrators/{adminId} {
+      allow get: if isValidId(adminId) && (isAdmin() || (isVerified() && adminId == request.auth.uid));
+      allow list: if isAdmin();
+      allow create: if isSuperAdmin()
+        && isValidId(adminId)
+        && isValidAdministrator(incoming())
+        && incoming().createdAt == request.time;
+      allow update: if isSuperAdmin()
+        && isValidId(adminId)
+        && isValidAdministrator(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'role']);
+      allow delete: if isSuperAdmin() && isValidId(adminId);
+    }
+  }
+}

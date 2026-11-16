@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEXORA — Digital Products &amp; Technology Innovation</title>
+    <meta
+      name="description"
+      content="Explore innovative digital products, AI solutions, online utilities, and web platforms built by NEXORA. One Vision. Multiple Innovations. Infinite Possibilities."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="NEXORA" />
+    <meta property="og:title" content="NEXORA — Digital Products & Technology Innovation" />
+    <meta
+      property="og:description"
+      content="Explore innovative digital products, AI solutions, online utilities, and web platforms built by NEXORA."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="NEXORA — Digital Products & Technology Innovation" />
+    <meta
+      name="twitter:description"
+      content="Explore innovative digital products, AI solutions, online utilities, and web platforms built by NEXORA."
+    />
+    <meta name="theme-color" content="#0A1124" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      (function () {
+        try {
+          var pref = localStorage.getItem('nexora_theme_preference');
+          var isDark =
+            pref === 'dark' ||
+            ((pref === 'system' || !pref) &&
+              window.matchMedia &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches);
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "NEXORA",
+        "description": "Independent digital products and technology innovation brand building practical software, AI tools, and online platforms.",
+        "slogan": "One Vision. Multiple Innovations. Infinite Possibilities."
+      }
+    </script>
+  </head>
+  <body class="bg-white text-slate-900 dark:bg-[#060B19] dark:text-slate-100 antialiased selection:bg-blue-600 selection:text-white">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

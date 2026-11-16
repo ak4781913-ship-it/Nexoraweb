@@ -1,0 +1,17 @@
+{
+  "name": "NEXORA — Digital Products Platform",
+  "short_name": "NEXORA",
+  "description": "One Vision. Multiple Innovations. Infinite Possibilities. Official digital products directory and platform by NEXORA.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#060B19",
+  "theme_color": "#0A1124",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

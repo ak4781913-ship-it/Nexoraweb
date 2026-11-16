@@ -1,0 +1,234 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A digital product or platform created under the NEXORA brand.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "slug": { "type": "string", "minLength": 2, "maxLength": 120, "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "shortDescription": { "type": "string", "minLength": 2, "maxLength": 280 },
+        "fullDescription": { "type": "string", "maxLength": 15000 },
+        "logoUrl": { "type": "string", "maxLength": 2000 },
+        "coverImageUrl": { "type": "string", "maxLength": 2000 },
+        "screenshotGallery": { "type": "array", "description": "Up to 12 screenshot URLs" },
+        "categoryId": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "categoryName": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "tags": { "type": "array", "description": "Up to 15 tags" },
+        "features": { "type": "array", "description": "Up to 25 feature statements" },
+        "benefits": { "type": "array", "description": "Up to 25 benefit statements" },
+        "officialWebsiteUrl": { "type": "string", "maxLength": 1000 },
+        "productType": {
+          "type": "string",
+          "enum": ["Website", "Web Application", "Mobile Application", "AI Tool", "Online Service", "Digital Platform"]
+        },
+        "pricingType": {
+          "type": "string",
+          "enum": ["Free", "Freemium", "Premium"]
+        },
+        "supportedPlatforms": { "type": "array", "description": "Up to 12 platform names" },
+        "launchDate": { "type": "string", "maxLength": 40 },
+        "featured": { "type": "boolean" },
+        "displayOrder": { "type": "number" },
+        "seoTitle": { "type": "string", "maxLength": 140 },
+        "seoDescription": { "type": "string", "maxLength": 320 },
+        "publicationStatus": {
+          "type": "string",
+          "enum": ["Draft", "Coming Soon", "Live", "Under Development", "Archived"]
+        },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "name",
+        "slug",
+        "shortDescription",
+        "fullDescription",
+        "logoUrl",
+        "coverImageUrl",
+        "screenshotGallery",
+        "categoryId",
+        "categoryName",
+        "tags",
+        "features",
+        "benefits",
+        "officialWebsiteUrl",
+        "productType",
+        "pricingType",
+        "supportedPlatforms",
+        "launchDate",
+        "featured",
+        "displayOrder",
+        "seoTitle",
+        "seoDescription",
+        "publicationStatus",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "A digital product taxonomy category.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "slug": { "type": "string", "minLength": 2, "maxLength": 80, "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "icon": { "type": "string", "minLength": 1, "maxLength": 40 },
+        "imageUrl": { "type": "string", "maxLength": 2000 },
+        "description": { "type": "string", "maxLength": 400 },
+        "displayOrder": { "type": "number" },
+        "publicationStatus": { "type": "string", "enum": ["Published", "Hidden"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "name",
+        "slug",
+        "icon",
+        "imageUrl",
+        "description",
+        "displayOrder",
+        "publicationStatus",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "UpdatePost": {
+      "title": "UpdatePost",
+      "description": "An official announcement, product launch note, or platform update.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "minLength": 2, "maxLength": 160 },
+        "slug": { "type": "string", "minLength": 2, "maxLength": 160, "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "summary": { "type": "string", "minLength": 2, "maxLength": 400 },
+        "content": { "type": "string", "maxLength": 15000 },
+        "type": { "type": "string", "enum": ["Product Launch", "Platform Update", "Announcement", "Roadmap"] },
+        "relatedProductSlug": { "type": "string", "maxLength": 120 },
+        "coverImageUrl": { "type": "string", "maxLength": 2000 },
+        "publishedAt": { "type": "string", "maxLength": 40 },
+        "publicationStatus": { "type": "string", "enum": ["Published", "Draft"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "title",
+        "slug",
+        "summary",
+        "content",
+        "type",
+        "relatedProductSlug",
+        "coverImageUrl",
+        "publishedAt",
+        "publicationStatus",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ContactMessage": {
+      "title": "ContactMessage",
+      "description": "A private inquiry submitted via the public contact form.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "minLength": 2, "maxLength": 100 },
+        "email": { "type": "string", "minLength": 5, "maxLength": 150 },
+        "subject": { "type": "string", "minLength": 2, "maxLength": 160 },
+        "message": { "type": "string", "minLength": 10, "maxLength": 4000 },
+        "status": { "type": "string", "enum": ["New", "Read", "Replied", "Archived"] },
+        "honeypot": { "type": "string", "maxLength": 0 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "name",
+        "email",
+        "subject",
+        "message",
+        "status",
+        "honeypot",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "SiteSettings": {
+      "title": "SiteSettings",
+      "description": "Global NEXORA website branding, metadata, about copy, and public links.",
+      "type": "object",
+      "properties": {
+        "brandName": { "type": "string", "minLength": 2, "maxLength": 60 },
+        "tagline": { "type": "string", "maxLength": 200 },
+        "brandLogoUrl": { "type": "string", "maxLength": 2000 },
+        "brandDescription": { "type": "string", "maxLength": 1000 },
+        "aboutMission": { "type": "string", "maxLength": 2000 },
+        "aboutVision": { "type": "string", "maxLength": 2000 },
+        "aboutStory": { "type": "string", "maxLength": 8000 },
+        "defaultTheme": { "type": "string", "enum": ["light", "dark", "system"] },
+        "seoTitle": { "type": "string", "maxLength": 120 },
+        "seoDescription": { "type": "string", "maxLength": 320 },
+        "contactEmail": { "type": "string", "maxLength": 150 },
+        "contactLocation": { "type": "string", "maxLength": 160 },
+        "socialGithub": { "type": "string", "maxLength": 500 },
+        "socialX": { "type": "string", "maxLength": 500 },
+        "socialLinkedin": { "type": "string", "maxLength": 500 },
+        "socialYoutube": { "type": "string", "maxLength": 500 },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "brandName",
+        "tagline",
+        "brandLogoUrl",
+        "brandDescription",
+        "aboutMission",
+        "aboutVision",
+        "aboutStory",
+        "defaultTheme",
+        "seoTitle",
+        "seoDescription",
+        "contactEmail",
+        "contactLocation",
+        "socialGithub",
+        "socialX",
+        "socialLinkedin",
+        "socialYoutube",
+        "updatedAt"
+      ]
+    },
+    "Administrator": {
+      "title": "Administrator",
+      "description": "Authorized NEXORA administrator record keyed by Firebase Auth UID.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "minLength": 5, "maxLength": 150 },
+        "displayName": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "role": { "type": "string", "enum": ["Super Admin", "Editor"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "displayName", "role", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "NEXORA digital products directory."
+    },
+    "/categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/Category" },
+      "description": "NEXORA product categories."
+    },
+    "/updates/{updateId}": {
+      "schema": { "$ref": "#/entities/UpdatePost" },
+      "description": "Official NEXORA news, product launches, and announcements."
+    },
+    "/contactMessages/{messageId}": {
+      "schema": { "$ref": "#/entities/ContactMessage" },
+      "description": "Private visitor contact submissions."
+    },
+    "/siteSettings/{settingId}": {
+      "schema": { "$ref": "#/entities/SiteSettings" },
+      "description": "Global site configuration (single document 'global')."
+    },
+    "/administrators/{adminId}": {
+      "schema": { "$ref": "#/entities/Administrator" },
+      "description": "Authorized platform administrators."
+    }
+  }
+}

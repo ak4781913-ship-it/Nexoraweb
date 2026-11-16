@@ -1,0 +1,42 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    function isBootstrapAdmin() {
+      return isSignedIn() && request.auth.token.email == 'khanabs1512@gmail.com';
+    }
+
+    function isAdmin() {
+      return isBootstrapAdmin() || (
+        isSignedIn() &&
+        firestore.exists(/databases/ai-studio-80b53fef-edbe-4c89-8e26-45393e1f5d49/documents/administrators/$(request.auth.uid))
+      );
+    }
+
+    function isValidImageUpload() {
+      return request.resource != null
+        && request.resource.size > 0
+        && request.resource.size <= 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/(png|jpeg|jpg|webp)');
+    }
+
+    // Publicly readable media assets uploaded by admins
+    match /nexora-media/{folder}/{fileName} {
+      allow read: if true;
+      allow create, update: if isAdmin()
+        && folder in ['products', 'categories', 'updates', 'brand']
+        && fileName.size() <= 160
+        && isValidImageUpload();
+      allow delete: if isAdmin();
+    }
+
+    // Default deny
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
