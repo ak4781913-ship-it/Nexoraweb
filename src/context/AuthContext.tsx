@@ -78,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAdminRole(profile.role);
       if (!profile.isAdmin) {
         setAuthError(
-          `The account ${cred.user.email ?? 'selected'} does not have administrator privileges for NEXORA.`,
+          `The account ${cred.user.email ?? 'selected'} does not have administrator privileges for MAWA.`,
         );
         return false;
       }

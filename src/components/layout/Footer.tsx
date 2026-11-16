@@ -24,7 +24,7 @@ export function Footer() {
             <Link to="/" className="inline-block">
               <NexoraLogo
                 logoUrl={settings.brandLogoUrl}
-                brandName={settings.brandName || 'NEXORA'}
+                brandName={settings.brandName || 'MAWA'}
               />
             </Link>
             <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400 max-w-sm">
@@ -39,7 +39,7 @@ export function Footer() {
                 {settings.contactEmail && (
                   <a
                     href={`mailto:${settings.contactEmail}`}
-                    aria-label="Email NEXORA"
+                    aria-label="Email MAWA"
                     className="inline-flex items-center justify-center h-9 w-9 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                   >
                     <Mail className="h-4 w-4" />
@@ -106,7 +106,7 @@ export function Footer() {
                   to="/about"
                   className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 >
-                  About NEXORA
+                  About MAWA
                 </Link>
               </li>
             </ul>
@@ -173,7 +173,7 @@ export function Footer() {
 
         <div className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-500">
           <p>
-            &copy; {year} {settings.brandName || 'NEXORA'}. All rights reserved.
+            &copy; {year} {settings.brandName || 'MAWA'}. All rights reserved.
           </p>
           <p>{settings.contactLocation}</p>
         </div>

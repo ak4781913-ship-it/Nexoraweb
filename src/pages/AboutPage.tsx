@@ -11,10 +11,10 @@ export function AboutPage() {
   return (
     <>
       <SeoHead
-        title={`About ${settings.brandName || 'NEXORA'} — Vision & Principles`}
+        title={`About ${settings.brandName || 'MAWA'} — Vision & Principles`}
         description={
           settings.brandDescription ||
-          'Learn about NEXORA, an independent digital products and technology innovation brand.'
+          'Learn about MAWA, a premium digital products and technology innovation platform.'
         }
         canonicalPath="/about"
         ogImage={GENERATED_ASSETS.aboutStudio}
@@ -39,7 +39,7 @@ export function AboutPage() {
           <div className="aspect-video rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-slate-100 dark:bg-[#0B1326]">
             <SafeImage
               src={GENERATED_ASSETS.aboutStudio}
-              alt="NEXORA engineering studio"
+              alt="MAWA engineering studio"
               className="w-full h-full object-cover"
             />
           </div>
@@ -66,7 +66,7 @@ export function AboutPage() {
 
           <div className="pt-8 border-t border-slate-200 dark:border-slate-800/80 space-y-4">
             <h2 className="font-display text-2xl font-bold text-slate-900 dark:text-white">
-              The NEXORA Approach
+              The MAWA Approach
             </h2>
             <p className="text-base text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line max-w-3xl">
               {settings.aboutStory}
@@ -78,7 +78,7 @@ export function AboutPage() {
               to="/products"
               className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
             >
-              Explore NEXORA Products
+              Explore MAWA Products
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link

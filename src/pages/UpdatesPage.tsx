@@ -44,8 +44,8 @@ export function UpdatesPage() {
   return (
     <>
       <SeoHead
-        title="What's New & Announcements — NEXORA"
-        description="Official product launches, platform updates, and engineering announcements from NEXORA."
+        title="What's New & Announcements — MAWA"
+        description="Official product launches, platform updates, and engineering announcements from MAWA."
         canonicalPath="/updates"
       />
 
@@ -55,7 +55,7 @@ export function UpdatesPage() {
             Changelog &amp; News
           </p>
           <h1 className="mt-2 font-display text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
-            What&apos;s New at NEXORA
+            What&apos;s New at MAWA
           </h1>
           <p className="mt-3 text-base text-slate-600 dark:text-slate-300 max-w-2xl">
             Official release notes, product announcements, and platform roadmap

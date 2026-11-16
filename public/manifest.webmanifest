@@ -1,7 +1,7 @@
 {
-  "name": "NEXORA — Digital Products Platform",
-  "short_name": "NEXORA",
-  "description": "One Vision. Multiple Innovations. Infinite Possibilities. Official digital products directory and platform by NEXORA.",
+  "name": "MAWA — Digital Products Platform",
+  "short_name": "MAWA",
+  "description": "A Legacy of Innovation. Official digital products and technology innovation platform by MAWA.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#060B19",
@@ -11,6 +11,18 @@
       "src": "/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/mawa-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mawa-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]

@@ -231,7 +231,7 @@ export function AdminCategoriesPage() {
   return (
     <AdminLayout
       title="Categories"
-      breadcrumb="NEXORA Admin / Category Taxonomy"
+      breadcrumb="MAWA Admin / Category Taxonomy"
       actions={
         <button
           type="button"
@@ -244,8 +244,8 @@ export function AdminCategoriesPage() {
       }
     >
       <SeoHead
-        title="Manage Categories — NEXORA Admin"
-        description="Manage NEXORA product categories."
+        title="Manage Categories — MAWA Admin"
+        description="Manage MAWA product categories."
         noIndex
       />
 

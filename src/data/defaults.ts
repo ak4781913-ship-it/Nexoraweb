@@ -14,22 +14,22 @@ export const GENERATED_ASSETS = {
 };
 
 export const DEFAULT_SITE_SETTINGS: SiteSettingsInput = {
-  brandName: 'NEXORA',
-  tagline: 'One Vision. Multiple Innovations. Infinite Possibilities.',
+  brandName: 'MAWA',
+  tagline: 'A Legacy of Innovation.',
   brandLogoUrl: '',
   brandDescription:
-    'NEXORA is an independent digital products and technology innovation brand building practical software applications, intelligent tools, and accessible online platforms.',
+    'MAWA is a premium digital products and technology innovation platform building independent software applications, intelligent tools, websites, and online ecosystems.',
   aboutMission:
-    'To design and engineer focused, dependable digital products that solve everyday problems clearly and make modern software accessible to everyone.',
+    'To design, engineer, and manage dependable digital products that solve everyday problems clearly and deliver modern software crafted to endure.',
   aboutVision:
-    'A cohesive family of specialized web platforms, intelligent tools, and digital applications unified by thoughtful engineering and enduring design.',
+    'A cohesive family of specialized software platforms, intelligent tools, websites, and applications united by clarity, engineering excellence, and A Legacy of Innovation.',
   aboutStory:
-    'NEXORA was founded around a straightforward conviction: software should respect people’s time. Rather than bundling bloated features into monolithic apps, NEXORA builds independent, purpose-built products—from everyday utilities and creative studios to specialized learning platforms—each carrying the same standard of clarity, reliability, and craft.',
+    'MAWA was built around a straightforward conviction: software should respect people’s time and earn lasting trust. Rather than bundling bloated features into monolithic apps, MAWA develops, manages, and publishes multiple independent digital products—from everyday utilities and AI studios to specialized learning platforms—each carrying the same standard of clarity, reliability, and craft.',
   defaultTheme: 'dark',
-  seoTitle: 'NEXORA — Digital Products & Technology Innovation',
+  seoTitle: 'MAWA — A Legacy of Innovation. | Digital Products & Technology Platform',
   seoDescription:
-    'Explore innovative digital products, intelligent tools, and online platforms built by NEXORA. One Vision. Multiple Innovations. Infinite Possibilities.',
-  contactEmail: 'contact@nexora.platform',
+    'Explore digital products, software platforms, AI solutions, and web applications built by MAWA. A Legacy of Innovation.',
+  contactEmail: 'contact@mawa.platform',
   contactLocation: 'Global Digital Studio',
   socialGithub: '',
   socialX: '',
@@ -122,7 +122,7 @@ export const DEFAULT_CATEGORIES: Array<{ id: string } & CategoryInput> = [
     icon: 'Box',
     imageUrl: '',
     description:
-      'Specialized community platforms, culinary archives, and independent NEXORA initiatives.',
+      'Specialized community platforms, culinary archives, and independent MAWA initiatives.',
     displayOrder: 8,
     publicationStatus: 'Published',
   },
@@ -132,12 +132,12 @@ export const DEFAULT_CATEGORIES: Array<{ id: string } & CategoryInput> = [
 export const PLANNED_DRAFT_PRODUCTS: Array<{ id: string } & ProductInput> = [
   {
     id: 'nexora-free-tools-hub',
-    name: 'NEXORA Free Tools Hub',
-    slug: 'nexora-free-tools-hub',
+    name: 'MAWA Free Tools Hub',
+    slug: 'mawa-free-tools-hub',
     shortDescription:
       'A unified collection of fast, accessible browser utilities for everyday digital tasks.',
     fullDescription:
-      'NEXORA Free Tools Hub is designed to bring together practical formatting, conversion, text, and productivity utilities under a single distraction-free interface. Product profile details and external release URL are pending final verification before publication.',
+      'MAWA Free Tools Hub is designed to bring together practical formatting, conversion, text, and productivity utilities under a single distraction-free interface. Product profile details and external release URL are pending final verification before publication.',
     logoUrl: '',
     coverImageUrl: GENERATED_ASSETS.ecosystemHub,
     screenshotGallery: [],
@@ -147,7 +147,7 @@ export const PLANNED_DRAFT_PRODUCTS: Array<{ id: string } & ProductInput> = [
     features: [
       'Instant browser-based execution with zero installation',
       'Clean, distraction-free interface across desktop and mobile',
-      'Consistent NEXORA design language and keyboard navigation',
+      'Consistent MAWA design language and keyboard navigation',
     ],
     benefits: [
       'Saves time on everyday file, text, and formatting workflows',
@@ -160,19 +160,19 @@ export const PLANNED_DRAFT_PRODUCTS: Array<{ id: string } & ProductInput> = [
     launchDate: '',
     featured: false,
     displayOrder: 1,
-    seoTitle: 'NEXORA Free Tools Hub — Online Utilities Platform',
+    seoTitle: 'MAWA Free Tools Hub — Online Utilities Platform',
     seoDescription:
-      'Planned NEXORA digital utilities hub providing accessible browser tools.',
+      'Planned MAWA digital utilities hub providing accessible browser tools.',
     publicationStatus: 'Draft',
   },
   {
     id: 'nexora-beauty-tips',
-    name: 'NEXORA Beauty Tips',
-    slug: 'nexora-beauty-tips',
+    name: 'MAWA Beauty Tips',
+    slug: 'mawa-beauty-tips',
     shortDescription:
       'Practical skincare, grooming, and everyday beauty guidance organized for clarity.',
     fullDescription:
-      'NEXORA Beauty Tips is planned as a clean, well-structured digital publication and routine companion focused on accessible personal care guidance. Content verification and official URL configuration are managed in the Admin Dashboard prior to release.',
+      'MAWA Beauty Tips is planned as a clean, well-structured digital publication and routine companion focused on accessible personal care guidance. Content verification and official URL configuration are managed in the Admin Dashboard prior to release.',
     logoUrl: '',
     coverImageUrl: '',
     screenshotGallery: [],
@@ -193,19 +193,19 @@ export const PLANNED_DRAFT_PRODUCTS: Array<{ id: string } & ProductInput> = [
     launchDate: '',
     featured: false,
     displayOrder: 2,
-    seoTitle: 'NEXORA Beauty Tips — Skincare & Lifestyle Guide',
+    seoTitle: 'MAWA Beauty Tips — Skincare & Lifestyle Guide',
     seoDescription:
-      'Planned NEXORA lifestyle platform dedicated to practical beauty and skincare guidance.',
+      'Planned MAWA lifestyle platform dedicated to practical beauty and skincare guidance.',
     publicationStatus: 'Draft',
   },
   {
     id: 'nexora-prompt-studio',
-    name: 'NEXORA Prompt Studio',
-    slug: 'nexora-prompt-studio',
+    name: 'MAWA Prompt Studio',
+    slug: 'mawa-prompt-studio',
     shortDescription:
       'A structured workspace for crafting, organizing, and refining AI prompts.',
     fullDescription:
-      'NEXORA Prompt Studio is envisioned as a dedicated environment for creators, developers, and researchers to structure reusable prompt templates and workflows. Publication awaits verified product configuration and release URL.',
+      'MAWA Prompt Studio is envisioned as a dedicated environment for creators, developers, and researchers to structure reusable prompt templates and workflows. Publication awaits verified product configuration and release URL.',
     logoUrl: '',
     coverImageUrl: GENERATED_ASSETS.ecosystemAi,
     screenshotGallery: [],
@@ -226,19 +226,19 @@ export const PLANNED_DRAFT_PRODUCTS: Array<{ id: string } & ProductInput> = [
     launchDate: '',
     featured: false,
     displayOrder: 3,
-    seoTitle: 'NEXORA Prompt Studio — Structured AI Prompt Workspace',
+    seoTitle: 'MAWA Prompt Studio — Structured AI Prompt Workspace',
     seoDescription:
-      'Planned NEXORA AI Tool for crafting and managing structured prompts.',
+      'Planned MAWA AI Tool for crafting and managing structured prompts.',
     publicationStatus: 'Draft',
   },
   {
     id: 'nexora-language-academy',
-    name: 'NEXORA Language Academy',
-    slug: 'nexora-language-academy',
+    name: 'MAWA Language Academy',
+    slug: 'mawa-language-academy',
     shortDescription:
       'Interactive language learning modules focused on practical daily communication.',
     fullDescription:
-      'NEXORA Language Academy is planned as an online learning application built around concise lessons, vocabulary reinforcement, and real-world phrasing. Complete product details and release link will be published once verified.',
+      'MAWA Language Academy is planned as an online learning application built around concise lessons, vocabulary reinforcement, and real-world phrasing. Complete product details and release link will be published once verified.',
     logoUrl: '',
     coverImageUrl: '',
     screenshotGallery: [],
@@ -259,19 +259,19 @@ export const PLANNED_DRAFT_PRODUCTS: Array<{ id: string } & ProductInput> = [
     launchDate: '',
     featured: false,
     displayOrder: 4,
-    seoTitle: 'NEXORA Language Academy — Online Language Learning',
+    seoTitle: 'MAWA Language Academy — Online Language Learning',
     seoDescription:
-      'Planned NEXORA education platform for practical language learning.',
+      'Planned MAWA education platform for practical language learning.',
     publicationStatus: 'Draft',
   },
   {
     id: 'nexora-homemade',
-    name: 'NEXORA Homemade',
-    slug: 'nexora-homemade',
+    name: 'MAWA Homemade',
+    slug: 'mawa-homemade',
     shortDescription:
       'A clean digital archive for authentic homemade recipes, crafts, and kitchen guides.',
     fullDescription:
-      'NEXORA Homemade is planned as an independent digital platform celebrating approachable homemade recipes and step-by-step domestic craft guides. Ready for final editorial completion by the NEXORA administration team.',
+      'MAWA Homemade is planned as an independent digital platform celebrating approachable homemade recipes and step-by-step domestic craft guides. Ready for final editorial completion by the MAWA administration team.',
     logoUrl: '',
     coverImageUrl: '',
     screenshotGallery: [],
@@ -292,9 +292,9 @@ export const PLANNED_DRAFT_PRODUCTS: Array<{ id: string } & ProductInput> = [
     launchDate: '',
     featured: false,
     displayOrder: 5,
-    seoTitle: 'NEXORA Homemade — Recipes & Craft Guides',
+    seoTitle: 'MAWA Homemade — Recipes & Craft Guides',
     seoDescription:
-      'Planned NEXORA digital platform for homemade recipes and step-by-step guides.',
+      'Planned MAWA digital platform for homemade recipes and step-by-step guides.',
     publicationStatus: 'Draft',
   },
 ];
@@ -302,12 +302,12 @@ export const PLANNED_DRAFT_PRODUCTS: Array<{ id: string } & ProductInput> = [
 export const DEFAULT_UPDATES: Array<{ id: string } & UpdateInput> = [
   {
     id: 'introducing-nexora-platform',
-    title: 'Introducing the Official NEXORA Digital Products Platform',
-    slug: 'introducing-nexora-platform',
+    title: 'Introducing the Official MAWA Digital Products Platform',
+    slug: 'introducing-mawa-platform',
     summary:
-      'NEXORA launches its central directory and brand home connecting independent web applications, AI tools, and online platforms.',
+      'MAWA launches its central directory and brand home connecting independent web applications, AI tools, and online platforms.',
     content:
-      'Welcome to the official NEXORA platform. Designed as the central hub for every product built under the NEXORA identity, this portal brings together our product directory, category architecture, release updates, and direct contact channels.\n\nEach NEXORA product operates with its own focused purpose and independent domain while sharing a unified commitment to clarity, reliability, and accessible design.',
+      'Welcome to the official MAWA platform. Designed as the central hub for every product built under the MAWA identity, this portal brings together our product directory, category architecture, release updates, and direct contact channels.\n\nEach MAWA product operates with its own focused purpose and independent domain while sharing a unified commitment to clarity, reliability, and accessible design.',
     type: 'Announcement',
     relatedProductSlug: '',
     coverImageUrl: GENERATED_ASSETS.heroArchitecture,
@@ -316,12 +316,12 @@ export const DEFAULT_UPDATES: Array<{ id: string } & UpdateInput> = [
   },
   {
     id: 'nexora-product-roadmap-overview',
-    title: 'Product Ecosystem Roadmap & Upcoming Releases',
-    slug: 'nexora-product-roadmap-overview',
+    title: 'MAWA Product Ecosystem Roadmap & Upcoming Releases',
+    slug: 'mawa-product-roadmap-overview',
     summary:
-      'An overview of the foundational NEXORA product initiatives currently in preparation across utilities, AI tools, education, and lifestyle.',
+      'An overview of the foundational MAWA product initiatives currently in preparation across utilities, AI tools, education, and lifestyle.',
     content:
-      'Our engineering and product teams are actively preparing the initial wave of NEXORA platforms—including NEXORA Free Tools Hub, NEXORA Prompt Studio, NEXORA Language Academy, NEXORA Beauty Tips, and NEXORA Homemade.\n\nEach product will transition from internal preparation to public release on this platform as soon as its core experience, documentation, and official website are verified.',
+      'Our engineering and product teams are actively preparing the initial wave of MAWA platforms—including MAWA Free Tools Hub, MAWA Prompt Studio, MAWA Language Academy, MAWA Beauty Tips, and MAWA Homemade.\n\nEach product will transition from internal preparation to public release on this platform as soon as its core experience, documentation, and official website are verified.',
     type: 'Roadmap',
     relatedProductSlug: '',
     coverImageUrl: GENERATED_ASSETS.ecosystemAi,

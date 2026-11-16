@@ -210,11 +210,11 @@ export function AdminSettingsPage() {
   return (
     <AdminLayout
       title="Settings & Content"
-      breadcrumb="NEXORA Admin / Global Configuration"
+      breadcrumb="MAWA Admin / Global Configuration"
     >
       <SeoHead
-        title="Settings — NEXORA Admin"
-        description="Configure NEXORA brand identity, about copy, SEO metadata, and administrators."
+        title="Settings — MAWA Admin"
+        description="Configure MAWA brand identity, about copy, SEO metadata, and administrators."
         noIndex
       />
 
@@ -280,7 +280,7 @@ export function AdminSettingsPage() {
 
           <div>
             <label className="block text-xs font-semibold mb-1">
-              Brand Logo URL or Upload (leave empty to use geometric NEXORA mark)
+              Brand Logo URL or Upload (leave empty to use geometric MAWA mark)
             </label>
             <div className="flex gap-2">
               <input
@@ -360,7 +360,7 @@ export function AdminSettingsPage() {
 
           <div>
             <label className="block text-xs font-semibold mb-1">
-              NEXORA Brand Story
+              MAWA Brand Story
             </label>
             <textarea
               rows={4}
@@ -542,7 +542,7 @@ export function AdminSettingsPage() {
                   type="email"
                   value={newAdminEmail}
                   onChange={(e) => setNewAdminEmail(e.target.value)}
-                  placeholder="admin@nexora..."
+                  placeholder="admin@mawa..."
                   className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
                 />
               </div>

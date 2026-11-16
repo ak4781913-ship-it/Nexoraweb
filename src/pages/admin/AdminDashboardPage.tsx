@@ -100,10 +100,10 @@ export function AdminDashboardPage() {
     !loading && (products.length === 0 || categories.length === 0);
 
   return (
-    <AdminLayout title="Dashboard" breadcrumb="NEXORA Admin / Overview">
+    <AdminLayout title="Dashboard" breadcrumb="MAWA Admin / Overview">
       <SeoHead
-        title="Admin Dashboard — NEXORA"
-        description="NEXORA administrative overview."
+        title="Admin Dashboard — MAWA"
+        description="MAWA administrative overview."
         noIndex
       />
 
@@ -113,11 +113,11 @@ export function AdminDashboardPage() {
             <div className="space-y-1">
               <h2 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                 <Database className="h-4 w-4 text-blue-600 dark:text-cyan-400" />
-                Initialize Default NEXORA Catalog
+                Initialize Default MAWA Catalog
               </h2>
               <p className="text-sm text-slate-600 dark:text-slate-300">
                 Populate Firestore with the 8 standard categories, global brand
-                settings, initial announcements, and the 5 planned NEXORA
+                settings, initial announcements, and the 5 planned MAWA
                 products in Draft status.
               </p>
             </div>

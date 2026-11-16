@@ -349,7 +349,7 @@ export function AdminProductsPage() {
   return (
     <AdminLayout
       title="Products"
-      breadcrumb="NEXORA Admin / Product Directory"
+      breadcrumb="MAWA Admin / Product Directory"
       actions={
         <button
           type="button"
@@ -362,8 +362,8 @@ export function AdminProductsPage() {
       }
     >
       <SeoHead
-        title="Manage Products — NEXORA Admin"
-        description="NEXORA product catalog management."
+        title="Manage Products — MAWA Admin"
+        description="MAWA product catalog management."
         noIndex
       />
 
@@ -753,7 +753,7 @@ export function AdminProductsPage() {
                     <input
                       type="url"
                       maxLength={1000}
-                      placeholder="https://product.nexora..."
+                      placeholder="https://product.mawa..."
                       value={form.officialWebsiteUrl}
                       onChange={(e) =>
                         setForm((prev) => ({

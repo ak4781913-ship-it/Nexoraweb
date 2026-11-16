@@ -182,22 +182,22 @@ export function ProductsPage() {
   return (
     <>
       <SeoHead
-        title="Products Directory — NEXORA"
-        description="Search and filter digital products, AI tools, web applications, and online utilities built under the NEXORA brand."
+        title="Products Directory — MAWA"
+        description="Search and filter digital products, AI tools, web applications, and online platforms built under the MAWA brand."
         canonicalPath="/products"
       />
 
       <section className="border-b border-slate-200 dark:border-slate-800/80 bg-slate-50/70 dark:bg-[#080F22] py-12 sm:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-xs font-semibold tracking-wider uppercase text-blue-600 dark:text-cyan-400">
-            NEXORA Directory
+            MAWA Directory
           </p>
           <h1 className="mt-2 font-display text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
             Digital Products &amp; Platforms
           </h1>
           <p className="mt-3 text-base text-slate-600 dark:text-slate-300 max-w-2xl">
             Explore all publicly released and upcoming software applications, AI
-            tools, and online services created by NEXORA.
+            tools, and online services created by MAWA.
           </p>
         </div>
       </section>
@@ -424,7 +424,7 @@ export function ProductsPage() {
               </h2>
               <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                 {products.length === 0
-                  ? 'NEXORA products are currently in preparation and will appear here as soon as they are verified and published.'
+                  ? 'MAWA products are currently in preparation and will appear here as soon as they are verified and published.'
                   : 'Try clearing one or more filters or adjusting your search keywords.'}
               </p>
               <div className="mt-6 flex flex-wrap items-center justify-center gap-3">

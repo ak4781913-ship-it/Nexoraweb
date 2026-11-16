@@ -576,7 +576,7 @@ export async function saveSiteSettings(
   try {
     await setDoc(doc(db, 'siteSettings', 'global'), {
       ...input,
-      brandName: input.brandName.trim().slice(0, 60) || 'NEXORA',
+      brandName: input.brandName.trim().slice(0, 60) || 'MAWA',
       tagline: input.tagline.trim().slice(0, 200),
       brandLogoUrl: input.brandLogoUrl.trim().slice(0, 2000),
       brandDescription: input.brandDescription.trim().slice(0, 1000),

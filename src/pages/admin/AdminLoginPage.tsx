@@ -38,8 +38,8 @@ export function AdminLoginPage() {
   return (
     <>
       <SeoHead
-        title="Administrator Sign In — NEXORA"
-        description="Restricted administrative portal for NEXORA platform management."
+        title="Administrator Sign In — MAWA"
+        description="Restricted administrative portal for MAWA platform management."
         noIndex
       />
 
@@ -48,7 +48,7 @@ export function AdminLoginPage() {
           <div className="flex items-center justify-between">
             <NexoraLogo
               logoUrl={settings.brandLogoUrl}
-              brandName={settings.brandName || 'NEXORA'}
+              brandName={settings.brandName || 'MAWA'}
             />
             <ShieldCheck className="h-5 w-5 text-blue-600 dark:text-cyan-400" />
           </div>
@@ -59,7 +59,7 @@ export function AdminLoginPage() {
             </h1>
             <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
               Sign in with an authorized Google administrator account to manage
-              NEXORA products, categories, announcements, and inquiries.
+              MAWA products, categories, announcements, and inquiries.
             </p>
           </div>
 
@@ -76,7 +76,7 @@ export function AdminLoginPage() {
             <div className="rounded-lg border border-amber-200 dark:border-amber-900/70 bg-amber-50 dark:bg-amber-950/40 p-4 space-y-3">
               <p className="text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
                 Signed in as <strong>{user.email}</strong>, which is not listed
-                as a NEXORA administrator.
+                as a MAWA administrator.
               </p>
               <button
                 type="button"

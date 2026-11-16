@@ -7,8 +7,8 @@ export function TermsPage() {
   return (
     <>
       <SeoHead
-        title="Terms of Service — NEXORA"
-        description="Terms governing the use of the official NEXORA digital products platform and directory."
+        title="Terms of Service — MAWA"
+        description="Terms governing the use of the official MAWA digital products platform and directory."
         canonicalPath="/terms"
       />
 
@@ -32,7 +32,7 @@ export function TermsPage() {
                 1. Acceptance of Terms
               </h2>
               <p>
-                By accessing the official {settings.brandName || 'NEXORA'}{' '}
+                By accessing the official {settings.brandName || 'MAWA'}{' '}
                 website and product directory, you agree to comply with these
                 Terms of Service and all applicable laws.
               </p>
@@ -43,8 +43,8 @@ export function TermsPage() {
                 2. Platform Directory &amp; Product Availability
               </h2>
               <p>
-                NEXORA serves as the central catalog for independently hosted
-                NEXORA websites, web applications, mobile apps, and AI tools.
+                MAWA serves as the central catalog for independently hosted
+                MAWA websites, web applications, mobile apps, and AI tools.
                 Product publication statuses (such as Live, Coming Soon, or
                 Under Development), pricing tiers, and feature sets may evolve
                 as individual platforms are updated.
@@ -56,8 +56,8 @@ export function TermsPage() {
                 3. Intellectual Property
               </h2>
               <p>
-                The NEXORA name, emblem, typography, visual assets, and product
-                descriptions published on this site belong to NEXORA and may not
+                The MAWA name, emblem, typography, visual assets, and product
+                descriptions published on this site belong to MAWA and may not
                 be redistributed or misrepresented without prior authorization.
               </p>
             </section>

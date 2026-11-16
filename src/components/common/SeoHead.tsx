@@ -51,13 +51,12 @@ export function SeoHead({
     upsertMeta('name', 'twitter:title', title);
     upsertMeta('name', 'twitter:description', description);
 
-    if (ogImage) {
-      const fullImg = ogImage.startsWith('http')
-        ? ogImage
-        : `${origin}${ogImage}`;
-      upsertMeta('property', 'og:image', fullImg);
-      upsertMeta('name', 'twitter:image', fullImg);
-    }
+    const effectiveOgImage = ogImage || '/mawa-og.png';
+    const fullImg = effectiveOgImage.startsWith('http')
+      ? effectiveOgImage
+      : `${origin}${effectiveOgImage}`;
+    upsertMeta('property', 'og:image', fullImg);
+    upsertMeta('name', 'twitter:image', fullImg);
 
     let canonical = document.head.querySelector<HTMLLinkElement>(
       'link[rel="canonical"]',
@@ -69,21 +68,21 @@ export function SeoHead({
     }
     canonical.setAttribute('href', canonicalUrl);
 
-    const existingScript = document.getElementById('nexora-dynamic-jsonld');
+    const existingScript = document.getElementById('mawa-dynamic-jsonld');
     if (existingScript) {
       existingScript.remove();
     }
 
     if (structuredData) {
       const script = document.createElement('script');
-      script.id = 'nexora-dynamic-jsonld';
+      script.id = 'mawa-dynamic-jsonld';
       script.type = 'application/ld+json';
       script.textContent = JSON.stringify(structuredData);
       document.head.appendChild(script);
     }
 
     return () => {
-      const script = document.getElementById('nexora-dynamic-jsonld');
+      const script = document.getElementById('mawa-dynamic-jsonld');
       if (script) script.remove();
     };
   }, [title, description, canonicalPath, ogType, ogImage, noIndex, structuredData]);

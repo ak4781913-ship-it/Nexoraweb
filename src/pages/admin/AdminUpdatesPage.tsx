@@ -195,7 +195,7 @@ export function AdminUpdatesPage() {
   return (
     <AdminLayout
       title="Updates & Announcements"
-      breadcrumb="NEXORA Admin / What's New"
+      breadcrumb="MAWA Admin / What's New"
       actions={
         <button
           type="button"
@@ -208,8 +208,8 @@ export function AdminUpdatesPage() {
       }
     >
       <SeoHead
-        title="Manage Updates — NEXORA Admin"
-        description="Manage NEXORA announcements and launch posts."
+        title="Manage Updates — MAWA Admin"
+        description="Manage MAWA announcements and launch posts."
         noIndex
       />
 
@@ -469,7 +469,7 @@ export function AdminUpdatesPage() {
                         relatedProductSlug: e.target.value,
                       }))
                     }
-                    placeholder="e.g., nexora-prompt-studio"
+                    placeholder="e.g., mawa-prompt-studio"
                     className="w-full px-3 py-2 text-sm font-mono rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
                   />
                 </div>

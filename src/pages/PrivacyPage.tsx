@@ -7,8 +7,8 @@ export function PrivacyPage() {
   return (
     <>
       <SeoHead
-        title="Privacy Policy — NEXORA"
-        description="Privacy Policy explaining how NEXORA collects, secures, and handles contact inquiries and platform data."
+        title="Privacy Policy — MAWA"
+        description="Privacy Policy explaining how MAWA collects, secures, and handles contact inquiries and platform data."
         canonicalPath="/privacy"
       />
 
@@ -32,7 +32,7 @@ export function PrivacyPage() {
                 1. Information We Collect
               </h2>
               <p>
-                When you browse the public NEXORA platform, no personal account
+                When you browse the public MAWA platform, no personal account
                 registration is required. When you voluntarily submit an inquiry
                 through our Contact page, we collect the name, email address,
                 subject, and message content you provide so our team can respond
@@ -58,7 +58,7 @@ export function PrivacyPage() {
               <p>
                 Contact submissions are stored in Cloud Firestore and protected
                 by strict server-enforced security rules. Private messages are
-                accessible solely to authorized NEXORA administrators and are
+                accessible solely to authorized MAWA administrators and are
                 never sold or disclosed publicly.
               </p>
             </section>
@@ -68,7 +68,7 @@ export function PrivacyPage() {
                 4. External Product Websites
               </h2>
               <p>
-                Individual NEXORA products may link to their own dedicated
+                Individual MAWA products may link to their own dedicated
                 domains and applications. Each external product website maintains
                 its own applicable privacy disclosures for product-specific
                 features.

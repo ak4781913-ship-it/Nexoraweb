@@ -58,7 +58,7 @@ export function AdminLayout({
         <Link to="/admin/dashboard" className="flex items-center gap-2">
           <NexoraLogo
             logoUrl={settings.brandLogoUrl}
-            brandName={settings.brandName || 'NEXORA'}
+            brandName={settings.brandName || 'MAWA'}
             size="sm"
           />
         </Link>

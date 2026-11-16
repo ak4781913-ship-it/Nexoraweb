@@ -91,7 +91,7 @@ export function AdminMediaPage() {
 
   const builtInVisuals = [
     { name: 'Hero Architecture Visual', url: GENERATED_ASSETS.heroArchitecture },
-    { name: 'NEXORA Studio Environment', url: GENERATED_ASSETS.aboutStudio },
+    { name: 'MAWA Studio Environment', url: GENERATED_ASSETS.aboutStudio },
     { name: 'AI Systems Isometric', url: GENERATED_ASSETS.ecosystemAi },
     { name: 'Digital Hub Composition', url: GENERATED_ASSETS.ecosystemHub },
   ];
@@ -99,10 +99,10 @@ export function AdminMediaPage() {
   return (
     <AdminLayout
       title="Media Library"
-      breadcrumb="NEXORA Admin / Firebase Storage"
+      breadcrumb="MAWA Admin / Firebase Storage"
     >
       <SeoHead
-        title="Media Library — NEXORA Admin"
+        title="Media Library — MAWA Admin"
         description="Upload and manage product images and brand assets."
         noIndex
       />
@@ -221,7 +221,7 @@ export function AdminMediaPage() {
           ) : (
             <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0B1326] p-8 text-center text-sm text-slate-500 dark:text-slate-400">
               No uploaded files in Firebase Storage yet. Upload an image above
-              or use the built-in NEXORA brand visuals below.
+              or use the built-in MAWA brand visuals below.
             </div>
           )}
         </div>

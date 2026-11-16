@@ -81,8 +81,8 @@ export function ContactPage() {
   return (
     <>
       <SeoHead
-        title="Contact NEXORA — Inquiries & Support"
-        description="Contact the NEXORA team for product support, partnerships, feedback, or general technology inquiries."
+        title="Contact MAWA — Inquiries & Support"
+        description="Contact the MAWA team for product support, partnerships, feedback, or general technology inquiries."
         canonicalPath="/contact"
       />
 
@@ -92,10 +92,10 @@ export function ContactPage() {
             Get in Touch
           </p>
           <h1 className="mt-2 font-display text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Contact NEXORA
+            Contact MAWA
           </h1>
           <p className="mt-3 text-base text-slate-600 dark:text-slate-300 max-w-2xl">
-            Have a question about a NEXORA product, partnership opportunity, or
+            Have a question about a MAWA product, partnership opportunity, or
             technical inquiry? Send a message directly to our team.
           </p>
         </div>
@@ -110,7 +110,7 @@ export function ContactPage() {
                   Direct Channels
                 </h2>
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  All submissions are stored securely for review by NEXORA
+                  All submissions are stored securely for review by MAWA
                   administrators.
                 </p>
               </div>
@@ -157,7 +157,7 @@ export function ContactPage() {
                     Message Received
                   </h2>
                   <p className="text-sm text-slate-600 dark:text-slate-300 max-w-md mx-auto">
-                    Thank you for contacting NEXORA. Your inquiry has been
+                    Thank you for contacting MAWA. Your inquiry has been
                     recorded and will be reviewed by our team.
                   </p>
                   <button

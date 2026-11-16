@@ -11,8 +11,8 @@ export function CategoriesPage() {
   return (
     <>
       <SeoHead
-        title="Product Categories — NEXORA"
-        description="Browse NEXORA digital product categories spanning AI & Innovation, Free Tools, Education, Productivity, Web Apps, and Mobile Apps."
+        title="Product Categories — MAWA"
+        description="Browse MAWA digital product categories spanning AI & Innovation, Free Tools, Education, Productivity, Web Apps, and Mobile Apps."
         canonicalPath="/categories"
       />
 
@@ -25,7 +25,7 @@ export function CategoriesPage() {
             Product Categories
           </h1>
           <p className="mt-3 text-base text-slate-600 dark:text-slate-300 max-w-2xl">
-            Every NEXORA platform is organized into a clear domain so you can
+            Every MAWA platform is organized into a clear domain so you can
             discover tools tailored to your needs.
           </p>
         </div>

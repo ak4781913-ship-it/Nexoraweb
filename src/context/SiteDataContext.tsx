@@ -76,7 +76,7 @@ export function SiteDataProvider({
       setError(
         err instanceof Error
           ? err.message
-          : 'Unable to load NEXORA catalog data.',
+          : 'Unable to load MAWA catalog data.',
       );
       setCategories(DEFAULT_CATEGORIES);
       setUpdates(DEFAULT_UPDATES);

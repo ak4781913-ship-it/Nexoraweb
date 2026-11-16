@@ -124,7 +124,7 @@ export function ProductDetailPage() {
       : `${window.location.origin}/products/${product.slug}`,
     publisher: {
       '@type': 'Organization',
-      name: settings.brandName || 'NEXORA',
+      name: settings.brandName || 'MAWA',
     },
     ...(product.pricingType === 'Free'
       ? {
@@ -147,7 +147,7 @@ export function ProductDetailPage() {
   return (
     <>
       <SeoHead
-        title={product.seoTitle || `${product.name} — A NEXORA Product`}
+        title={product.seoTitle || `${product.name} — A MAWA Product`}
         description={product.seoDescription || product.shortDescription}
         canonicalPath={`/products/${product.slug}`}
         ogImage={heroImage || undefined}
@@ -407,23 +407,23 @@ export function ProductDetailPage() {
               )}
             </div>
 
-            {/* 14. A NEXORA Product Brand Signature */}
+            {/* 14. A MAWA Product Brand Signature */}
             <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#080F22] p-6 space-y-3">
               <div className="flex items-center gap-2.5">
                 <NexoraLogo size="sm" showWordmark={false} />
                 <span className="text-sm font-semibold text-slate-900 dark:text-white">
-                  A NEXORA Product
+                  A MAWA Product
                 </span>
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                Engineered and maintained as part of the official NEXORA
+                Engineered and maintained as part of the official MAWA
                 digital products portfolio.
               </p>
               <Link
                 to="/about"
                 className="inline-block text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
               >
-                Learn about NEXORA standards
+                Learn about MAWA standards
               </Link>
             </div>
           </aside>
@@ -435,7 +435,7 @@ export function ProductDetailPage() {
         <section className="py-12 sm:py-16 border-t border-slate-200 dark:border-slate-800/80 bg-slate-50/70 dark:bg-[#080F22]">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="font-display text-2xl font-bold text-slate-900 dark:text-white mb-8">
-              Related NEXORA Products
+              Related MAWA Products
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {relatedProducts.map((rel) => (

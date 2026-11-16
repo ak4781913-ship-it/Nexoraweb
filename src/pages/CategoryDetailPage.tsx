@@ -31,10 +31,10 @@ export function CategoryDetailPage() {
   return (
     <>
       <SeoHead
-        title={`${category.name} — NEXORA Categories`}
+        title={`${category.name} — MAWA Categories`}
         description={
           category.description ||
-          `Explore ${category.name} digital products and platforms by NEXORA.`
+          `Explore ${category.name} digital products and platforms by MAWA.`
         }
         canonicalPath={`/categories/${category.slug}`}
       />

@@ -106,10 +106,10 @@ export function AdminMessagesPage() {
   return (
     <AdminLayout
       title="Contact Messages"
-      breadcrumb="NEXORA Admin / Private Inbox"
+      breadcrumb="MAWA Admin / Private Inbox"
     >
       <SeoHead
-        title="Contact Messages — NEXORA Admin"
+        title="Contact Messages — MAWA Admin"
         description="Review private visitor contact submissions."
         noIndex
       />

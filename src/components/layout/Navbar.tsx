@@ -57,7 +57,7 @@ export function Navbar() {
           >
             <NexoraLogo
               logoUrl={settings.brandLogoUrl}
-              brandName={settings.brandName || 'NEXORA'}
+              brandName={settings.brandName || 'MAWA'}
             />
           </Link>
 
@@ -87,7 +87,7 @@ export function Navbar() {
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              aria-label="Search NEXORA products"
+              aria-label="Search MAWA products"
               className="inline-flex items-center justify-center h-10 w-10 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70 hover:text-slate-900 dark:hover:text-white transition-colors"
             >
               <Search className="h-4 w-4" />
@@ -169,7 +169,7 @@ export function Navbar() {
                 autoFocus
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search NEXORA products, tools, or keywords..."
+                placeholder="Search MAWA products, tools, or keywords..."
                 className="flex-1 bg-transparent text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none py-2"
               />
               <button

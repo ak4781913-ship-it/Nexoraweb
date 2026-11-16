@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 128" fill="none">
+  <rect width="420" height="128" rx="20" fill="#060B19"/>
+  <rect x="1.5" y="1.5" width="417" height="125" rx="18.5" stroke="#1E293B" stroke-width="1.5"/>
+  <ellipse cx="76" cy="64" rx="64" ry="48" fill="url(#mawa_glow)" opacity="0.35"/>
+
+  <!-- Monogram + Orbital Swoosh + Star -->
+  <g transform="translate(24, 24)">
+    <rect width="80" height="80" rx="18" fill="#0B1328" stroke="#1E3A8A" stroke-opacity="0.7" stroke-width="1.5"/>
+    <path
+      d="M12 53C21.5 62 43 60.5 60 42C65.5 35.8 68.8 28.5 69.6 22.5"
+      stroke="url(#mawa_logo_orbit)"
+      stroke-width="3"
+      stroke-linecap="round"
+    />
+    <path
+      d="M15 56V25H23L32.5 41.5L42 25H50V56H43V36.8L34.6 51.2H30.4L22 36.8V56H15Z"
+      fill="url(#mawa_logo_grad)"
+    />
+    <path
+      d="M45.6 56L55.2 25H62L68.8 56H61.8L60.4 48.8H52.6L51.1 56H45.6ZM53.9 42.8H59.1L56.7 31.4L53.9 42.8Z"
+      fill="url(#mawa_logo_a_grad)"
+    />
+    <path
+      d="M65.6 13.1L67.2 17.7L71.8 19.3L67.2 20.9L65.6 25.5L64 20.9L59.4 19.3L64 17.7L65.6 13.1Z"
+      fill="#22D3EE"
+    />
+  </g>
+
+  <!-- Metallic White MAWA Wordmark -->
+  <text
+    x="126"
+    y="70"
+    font-family="'Plus Jakarta Sans', 'Inter', 'Segoe UI', Arial, sans-serif"
+    font-size="44"
+    font-weight="800"
+    letter-spacing="5"
+    fill="url(#mawa_metallic)"
+  >MAWA</text>
+
+  <!-- Official Tagline -->
+  <text
+    x="128"
+    y="96"
+    font-family="'DM Sans', 'Inter', 'Segoe UI', Arial, sans-serif"
+    font-size="14"
+    font-weight="600"
+    letter-spacing="1.4"
+    fill="#94A3B8"
+  >A Legacy of Innovation.</text>
+
+  <defs>
+    <radialGradient id="mawa_glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(76 64) rotate(90) scale(48 64)">
+      <stop stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#060B19" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="mawa_logo_grad" x1="15" y1="25" x2="50" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22D3EE"/>
+      <stop offset="0.55" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#8B5CF6"/>
+    </linearGradient>
+    <linearGradient id="mawa_logo_a_grad" x1="45" y1="25" x2="69" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FAFC"/>
+      <stop offset="0.55" stop-color="#60A5FA"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <linearGradient id="mawa_logo_orbit" x1="12" y1="56" x2="70" y2="22" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8B5CF6"/>
+      <stop offset="0.5" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <linearGradient id="mawa_metallic" x1="126" y1="34" x2="126" y2="74" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="0.55" stop-color="#E2E8F0"/>
+      <stop offset="1" stop-color="#94A3B8"/>
+    </linearGradient>
+  </defs>
+</svg>

@@ -17,7 +17,7 @@ import { useAuth } from '../context/AuthContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { GENERATED_ASSETS } from '../data/defaults';
 
-const WHY_NEXORA = [
+const WHY_MAWA = [
   {
     num: '01',
     title: 'Practical Digital Solutions',
@@ -46,7 +46,7 @@ const WHY_NEXORA = [
     num: '05',
     title: 'Independent Product Platforms',
     description:
-      'Each product operates on its own dedicated platform and domain while maintaining unified NEXORA engineering standards.',
+      'Each product operates on its own dedicated platform and domain while maintaining unified MAWA engineering standards.',
   },
 ];
 
@@ -98,13 +98,13 @@ export function HomePage() {
   return (
     <>
       <SeoHead
-        title={settings.seoTitle || 'NEXORA — Digital Products & Technology Innovation'}
+        title={settings.seoTitle || 'MAWA — A Legacy of Innovation. | Digital Products & Technology Platform'}
         description={
           settings.seoDescription ||
-          'Explore innovative digital products, intelligent tools, and online platforms built by NEXORA.'
+          'Explore digital products, software platforms, AI solutions, and web applications built by MAWA.'
         }
         canonicalPath="/"
-        ogImage={GENERATED_ASSETS.heroArchitecture}
+        ogImage="/mawa-og.png"
       />
 
       {/* B. Hero Section */}
@@ -148,7 +148,7 @@ export function HomePage() {
                   to="/about"
                   className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold rounded-lg border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/70 transition-colors whitespace-nowrap"
                 >
-                  Discover NEXORA
+                  Discover MAWA
                 </Link>
               </div>
             </motion.div>
@@ -162,7 +162,7 @@ export function HomePage() {
               <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-900 overflow-hidden shadow-2xl shadow-blue-950/15 dark:shadow-blue-950/40 aspect-video">
                 <SafeImage
                   src={GENERATED_ASSETS.heroArchitecture}
-                  alt="NEXORA architectural digital systems visualization"
+                  alt="MAWA architectural digital systems visualization"
                   loading="eager"
                   className="w-full h-full object-cover"
                 />
@@ -183,7 +183,7 @@ export function HomePage() {
             <div className="lg:col-span-6 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-slate-100 dark:bg-[#0B1326] min-h-[16rem]">
               <SafeImage
                 src={GENERATED_ASSETS.aboutStudio}
-                alt="NEXORA engineering and product design environment"
+                alt="MAWA engineering and product design environment"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -206,7 +206,7 @@ export function HomePage() {
                   to="/about"
                   className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline"
                 >
-                  Read the NEXORA story
+                  Read the MAWA story
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
@@ -228,7 +228,7 @@ export function HomePage() {
               </h2>
               <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300">
                 Purpose-built software applications, online utilities, and
-                digital platforms across the NEXORA ecosystem.
+                digital platforms across the MAWA ecosystem.
               </p>
             </div>
             <Link
@@ -258,11 +258,11 @@ export function HomePage() {
           ) : (
             <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0B1326] p-8 sm:p-10 text-center max-w-3xl mx-auto">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-                Upcoming NEXORA Releases in Preparation
+                Upcoming MAWA Releases in Preparation
               </h3>
               <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                 Our initial wave of digital products is currently undergoing
-                final verification in the NEXORA Studio before public launch.
+                final verification in the MAWA Studio before public launch.
                 Explore our product categories or follow platform announcements
                 for release updates.
               </p>
@@ -305,7 +305,7 @@ export function HomePage() {
                 Explore Categories
               </h2>
               <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300">
-                Browse NEXORA initiatives organized by domain and practical use
+                Browse MAWA initiatives organized by domain and practical use
                 case.
               </p>
             </div>
@@ -367,7 +367,7 @@ export function HomePage() {
                 Multiple Formats, One Cohesive Standard.
               </h2>
               <p className="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
-                NEXORA builds across six complementary software formats—ensuring
+                MAWA builds across six complementary software formats—ensuring
                 every idea takes the form that serves its users best, from
                 lightweight browser utilities to full web applications.
               </p>
@@ -416,7 +416,7 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* G. Why NEXORA? */}
+      {/* G. Why MAWA? */}
       <section className="py-16 sm:py-24 border-b border-slate-200 dark:border-slate-800/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl mb-12 space-y-2">
@@ -424,12 +424,12 @@ export function HomePage() {
               Engineering Principles
             </p>
             <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Why NEXORA?
+              Why MAWA?
             </h2>
           </div>
 
           <div className="divide-y divide-slate-200 dark:divide-slate-800/80 border-y border-slate-200 dark:border-slate-800/80">
-            {WHY_NEXORA.map((item) => (
+            {WHY_MAWA.map((item) => (
               <div
                 key={item.num}
                 className="py-6 grid grid-cols-1 md:grid-cols-12 gap-4 items-baseline"
@@ -528,7 +528,7 @@ export function HomePage() {
                 {settings.tagline}
               </p>
               <h2 className="font-display text-2xl sm:text-4xl font-bold tracking-tight text-balance">
-                Explore the growing suite of NEXORA digital products.
+                Explore the growing suite of MAWA digital products.
               </h2>
               <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
                 Discover independent tools, AI workflows, and web applications
@@ -547,7 +547,7 @@ export function HomePage() {
                   to="/contact"
                   className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold rounded-lg border border-slate-600 text-slate-100 hover:bg-slate-800 transition-colors whitespace-nowrap"
                 >
-                  Contact NEXORA
+                  Contact MAWA
                 </Link>
               </div>
             </div>

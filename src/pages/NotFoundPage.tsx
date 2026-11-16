@@ -6,8 +6,8 @@ export function NotFoundPage() {
   return (
     <>
       <SeoHead
-        title="Page Not Found (404) — NEXORA"
-        description="The requested page or product could not be found on the NEXORA platform."
+        title="Page Not Found (404) — MAWA"
+        description="The requested page or product could not be found on the MAWA platform."
         noIndex
       />
       <section className="py-24 sm:py-32">
