@@ -95,18 +95,34 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  to="/updates"
+                  to="/roadmap"
                   className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 >
-                  What&apos;s New
+                  Public Roadmap
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/about"
+                  to="/downloads"
                   className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 >
-                  About MAWA
+                  Download Center
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/changelog"
+                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  Changelog
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/updates"
+                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  What&apos;s New
                 </Link>
               </li>
             </ul>
@@ -114,10 +130,10 @@ export function Footer() {
 
           <div className="lg:col-span-3 space-y-3">
             <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
-              Categories
+              Categories &amp; Programs
             </h3>
             <ul className="space-y-2.5 text-sm">
-              {categories.slice(0, 6).map((cat) => (
+              {categories.slice(0, 4).map((cat) => (
                 <li key={cat.id}>
                   <Link
                     to={`/categories/${cat.slug}`}
@@ -127,6 +143,22 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link
+                  to="/developers"
+                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  Developers &amp; Ecosystem
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/partnerships"
+                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  Partnerships
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -135,6 +167,22 @@ export function Footer() {
               Support &amp; Legal
             </h3>
             <ul className="space-y-2.5 text-sm">
+              <li>
+                <Link
+                  to="/faq"
+                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  FAQ &amp; Help Center
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/business"
+                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  Business Inquiries
+                </Link>
+              </li>
               <li>
                 <Link
                   to="/contact"
@@ -157,6 +205,14 @@ export function Footer() {
                   className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 >
                   Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/unsubscribe"
+                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  Newsletter Unsubscribe
                 </Link>
               </li>
               <li>

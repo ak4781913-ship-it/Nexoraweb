@@ -9,7 +9,8 @@ interface ThemeContextValue {
   applyDefaultIfUnset: (defaultPref: ThemePreference) => void;
 }
 
-const STORAGE_KEY = 'nexora_theme_preference';
+const STORAGE_KEY = 'mawa_theme_preference';
+const LEGACY_STORAGE_KEY = 'nexora_theme_preference';
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
@@ -20,15 +21,21 @@ function getSystemTheme(): 'light' | 'dark' {
     : 'light';
 }
 
+function readSavedPreference(): ThemePreference | null {
+  if (typeof window === 'undefined') return null;
+  const saved =
+    localStorage.getItem(STORAGE_KEY) ??
+    localStorage.getItem(LEGACY_STORAGE_KEY);
+  if (saved === 'light' || saved === 'dark' || saved === 'system') {
+    return saved;
+  }
+  return null;
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [preference, setPreferenceState] = useState<ThemePreference>(() => {
-    if (typeof window === 'undefined') return 'system';
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === 'light' || saved === 'dark' || saved === 'system') {
-      return saved;
-    }
-    return 'system';
-  });
+  const [preference, setPreferenceState] = useState<ThemePreference>(
+    () => readSavedPreference() ?? 'system',
+  );
 
   const [systemTheme, setSystemTheme] = useState<'light' | 'dark'>(
     getSystemTheme,
@@ -58,6 +65,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setPreference = (pref: ThemePreference) => {
     setPreferenceState(pref);
     localStorage.setItem(STORAGE_KEY, pref);
+    localStorage.setItem(LEGACY_STORAGE_KEY, pref);
   };
 
   const toggleTheme = () => {
@@ -66,8 +74,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   const applyDefaultIfUnset = (defaultPref: ThemePreference) => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) {
+    if (!readSavedPreference()) {
       setPreferenceState(defaultPref);
     }
   };

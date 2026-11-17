@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Plus, Trash2, Upload } from 'lucide-react';
+import { Lock, Plus, Trash2, Upload } from 'lucide-react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { SeoHead } from '../../components/common/SeoHead';
@@ -11,6 +11,7 @@ import {
   fetchAdministrators,
   removeAdministrator,
   saveSiteSettings,
+  updateAdministratorRole,
 } from '../../services/firestoreService';
 import { uploadMediaFile } from '../../services/storageService';
 import { isSafeAssetUrl, isValidExternalUrl } from '../../utils/url';
@@ -46,10 +47,16 @@ export function AdminSettingsPage() {
     socialX: settings.socialX,
     socialLinkedin: settings.socialLinkedin,
     socialYoutube: settings.socialYoutube,
+    canonicalDomain: settings.canonicalDomain || '',
+    ogImageUrl: settings.ogImageUrl || '/mawa-og.png',
+    gaMeasurementId: settings.gaMeasurementId || '',
+    aiAssistantEnabled: settings.aiAssistantEnabled !== false,
+    newsletterEnabled: settings.newsletterEnabled !== false,
   });
 
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingOg, setUploadingOg] = useState(false);
 
   const [admins, setAdmins] = useState<Administrator[]>([]);
   const [newAdminUid, setNewAdminUid] = useState('');
@@ -78,6 +85,11 @@ export function AdminSettingsPage() {
       socialX: settings.socialX,
       socialLinkedin: settings.socialLinkedin,
       socialYoutube: settings.socialYoutube,
+      canonicalDomain: settings.canonicalDomain || '',
+      ogImageUrl: settings.ogImageUrl || '/mawa-og.png',
+      gaMeasurementId: settings.gaMeasurementId || '',
+      aiAssistantEnabled: settings.aiAssistantEnabled !== false,
+      newsletterEnabled: settings.newsletterEnabled !== false,
     });
   }, [settings]);
 
@@ -101,8 +113,32 @@ export function AdminSettingsPage() {
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isSuperAdmin) {
+      showToast('Only Super Admins can modify global site settings.', 'error');
+      return;
+    }
     if (form.brandLogoUrl.trim() && !isSafeAssetUrl(form.brandLogoUrl)) {
-      showToast('Brand logo URL must be a valid https://, http://, or local asset path.', 'error');
+      showToast(
+        'Brand logo URL must be a valid https://, http://, or local asset path.',
+        'error',
+      );
+      return;
+    }
+    if (
+      (form.ogImageUrl || '').trim() &&
+      !isSafeAssetUrl(form.ogImageUrl || '')
+    ) {
+      showToast(
+        'OpenGraph image URL must be a valid https://, http://, or local asset path.',
+        'error',
+      );
+      return;
+    }
+    if (
+      (form.canonicalDomain || '').trim() &&
+      !isValidExternalUrl(form.canonicalDomain || '')
+    ) {
+      showToast('Canonical domain URL must start with https:// or http://', 'error');
       return;
     }
     const socialChecks = [
@@ -148,6 +184,22 @@ export function AdminSettingsPage() {
     }
   };
 
+  const handleOgUpload = async (file: File) => {
+    setUploadingOg(true);
+    try {
+      const url = await uploadMediaFile(file, 'brand');
+      setForm((prev) => ({ ...prev, ogImageUrl: url }));
+      showToast('OpenGraph social image uploaded.', 'success');
+    } catch (err) {
+      showToast(
+        err instanceof Error ? err.message : 'OG image upload failed.',
+        'error',
+      );
+    } finally {
+      setUploadingOg(false);
+    }
+  };
+
   const handleAddAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isSuperAdmin) {
@@ -158,7 +210,10 @@ export function AdminSettingsPage() {
     const cleanEmail = newAdminEmail.trim();
     const cleanName = newAdminName.trim();
     if (!UID_REGEX.test(cleanUid)) {
-      showToast('Firebase Auth UID must be 1–128 alphanumeric, hyphen, or underscore characters.', 'error');
+      showToast(
+        'Firebase Auth UID must be 1–128 alphanumeric, hyphen, or underscore characters.',
+        'error',
+      );
       return;
     }
     if (!EMAIL_REGEX.test(cleanEmail)) {
@@ -192,6 +247,20 @@ export function AdminSettingsPage() {
     }
   };
 
+  const handleRoleChange = async (adm: Administrator, nextRole: AdminRole) => {
+    if (!isSuperAdmin) return;
+    try {
+      await updateAdministratorRole(adm.id, adm.displayName, nextRole);
+      showToast(`Updated ${adm.displayName} role to ${nextRole}.`, 'success');
+      await loadAdmins();
+    } catch (err) {
+      showToast(
+        err instanceof Error ? err.message : 'Could not update role.',
+        'error',
+      );
+    }
+  };
+
   const confirmRemoveAdmin = async () => {
     if (!removeAdminTarget) return;
     try {
@@ -219,6 +288,17 @@ export function AdminSettingsPage() {
       />
 
       <div className="space-y-10 max-w-4xl">
+        {!isSuperAdmin && (
+          <div className="rounded-xl border border-amber-200 dark:border-amber-800/80 bg-amber-50/70 dark:bg-amber-950/30 p-4 flex items-center gap-3 text-sm text-amber-800 dark:text-amber-300">
+            <Lock className="h-4 w-4 shrink-0" />
+            <span>
+              Signed in with the <strong>Editor</strong> role. Global brand
+              settings and administrator management are read-only and require{' '}
+              <strong>Super Admin</strong> permissions to save.
+            </span>
+          </div>
+        )}
+
         <form
           onSubmit={handleSaveSettings}
           className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0B1326] p-6 space-y-6"
@@ -235,11 +315,12 @@ export function AdminSettingsPage() {
               <input
                 type="text"
                 required
+                disabled={!isSuperAdmin}
                 value={form.brandName}
                 onChange={(e) =>
                   setForm((prev) => ({ ...prev, brandName: e.target.value }))
                 }
-                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] disabled:opacity-60"
               />
             </div>
 
@@ -248,6 +329,7 @@ export function AdminSettingsPage() {
                 Default Theme
               </label>
               <select
+                disabled={!isSuperAdmin}
                 value={form.defaultTheme}
                 onChange={(e) =>
                   setForm((prev) => ({
@@ -255,7 +337,7 @@ export function AdminSettingsPage() {
                     defaultTheme: e.target.value as ThemePreference,
                   }))
                 }
-                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] disabled:opacity-60"
               >
                 <option value="dark">Dark (Midnight Navy)</option>
                 <option value="light">Light (Clean White)</option>
@@ -270,11 +352,12 @@ export function AdminSettingsPage() {
             </label>
             <input
               type="text"
+              disabled={!isSuperAdmin}
               value={form.tagline}
               onChange={(e) =>
                 setForm((prev) => ({ ...prev, tagline: e.target.value }))
               }
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] disabled:opacity-60"
             />
           </div>
 
@@ -285,26 +368,29 @@ export function AdminSettingsPage() {
             <div className="flex gap-2">
               <input
                 type="text"
+                disabled={!isSuperAdmin}
                 value={form.brandLogoUrl}
                 onChange={(e) =>
                   setForm((prev) => ({ ...prev, brandLogoUrl: e.target.value }))
                 }
-                className="flex-1 px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
+                className="flex-1 px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] disabled:opacity-60"
               />
-              <label className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer">
-                <Upload className="h-3.5 w-3.5" />
-                {uploadingLogo ? '...' : 'Upload'}
-                <input
-                  type="file"
-                  accept="image/png,image/jpeg,image/webp"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    e.target.value = '';
-                    if (file) void handleLogoUpload(file);
-                  }}
-                />
-              </label>
+              {isSuperAdmin && (
+                <label className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer">
+                  <Upload className="h-3.5 w-3.5" />
+                  {uploadingLogo ? '...' : 'Upload'}
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      e.target.value = '';
+                      if (file) void handleLogoUpload(file);
+                    }}
+                  />
+                </label>
+              )}
             </div>
           </div>
 
@@ -314,6 +400,7 @@ export function AdminSettingsPage() {
             </label>
             <textarea
               rows={2}
+              disabled={!isSuperAdmin}
               value={form.brandDescription}
               onChange={(e) =>
                 setForm((prev) => ({
@@ -321,7 +408,7 @@ export function AdminSettingsPage() {
                   brandDescription: e.target.value,
                 }))
               }
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] disabled:opacity-60"
             />
           </div>
 
@@ -336,11 +423,12 @@ export function AdminSettingsPage() {
               </label>
               <textarea
                 rows={3}
+                disabled={!isSuperAdmin}
                 value={form.aboutMission}
                 onChange={(e) =>
                   setForm((prev) => ({ ...prev, aboutMission: e.target.value }))
                 }
-                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] disabled:opacity-60"
               />
             </div>
             <div>
@@ -349,11 +437,12 @@ export function AdminSettingsPage() {
               </label>
               <textarea
                 rows={3}
+                disabled={!isSuperAdmin}
                 value={form.aboutVision}
                 onChange={(e) =>
                   setForm((prev) => ({ ...prev, aboutVision: e.target.value }))
                 }
-                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] disabled:opacity-60"
               />
             </div>
           </div>
@@ -364,16 +453,17 @@ export function AdminSettingsPage() {
             </label>
             <textarea
               rows={4}
+              disabled={!isSuperAdmin}
               value={form.aboutStory}
               onChange={(e) =>
                 setForm((prev) => ({ ...prev, aboutStory: e.target.value }))
               }
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] disabled:opacity-60"
             />
           </div>
 
           <h2 className="font-display text-lg font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-3 pt-2">
-            Website SEO &amp; Contact Information
+            Website SEO, Domain, Analytics &amp; Modules
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -383,11 +473,12 @@ export function AdminSettingsPage() {
               </label>
               <input
                 type="text"
+                disabled={!isSuperAdmin}
                 value={form.seoTitle}
                 onChange={(e) =>
                   setForm((prev) => ({ ...prev, seoTitle: e.target.value }))
                 }
-                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] disabled:opacity-60"
               />
             </div>
             <div>
@@ -396,11 +487,12 @@ export function AdminSettingsPage() {
               </label>
               <input
                 type="email"
+                disabled={!isSuperAdmin}
                 value={form.contactEmail}
                 onChange={(e) =>
                   setForm((prev) => ({ ...prev, contactEmail: e.target.value }))
                 }
-                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] disabled:opacity-60"
               />
             </div>
           </div>
@@ -411,21 +503,129 @@ export function AdminSettingsPage() {
             </label>
             <input
               type="text"
+              disabled={!isSuperAdmin}
               value={form.seoDescription}
               onChange={(e) =>
                 setForm((prev) => ({ ...prev, seoDescription: e.target.value }))
               }
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] disabled:opacity-60"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold mb-1">
+                Canonical Production Domain URL (optional)
+              </label>
+              <input
+                type="url"
+                disabled={!isSuperAdmin}
+                placeholder="https://yourdomain.com"
+                value={form.canonicalDomain || ''}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    canonicalDomain: e.target.value,
+                  }))
+                }
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] disabled:opacity-60"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1">
+                GA4 Measurement ID (optional, loaded with consent)
+              </label>
+              <input
+                type="text"
+                maxLength={40}
+                disabled={!isSuperAdmin}
+                placeholder="G-XXXXXXXXXX"
+                value={form.gaMeasurementId || ''}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    gaMeasurementId: e.target.value,
+                  }))
+                }
+                className="w-full px-3 py-2 text-sm font-mono rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] disabled:opacity-60"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold mb-1">
+              Default OpenGraph Social Image URL
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                disabled={!isSuperAdmin}
+                value={form.ogImageUrl || ''}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, ogImageUrl: e.target.value }))
+                }
+                className="flex-1 px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] disabled:opacity-60"
+              />
+              {isSuperAdmin && (
+                <label className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer">
+                  <Upload className="h-3.5 w-3.5" />
+                  {uploadingOg ? '...' : 'Upload'}
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      e.target.value = '';
+                      if (file) void handleOgUpload(file);
+                    }}
+                  />
+                </label>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-6 pt-1">
+            <label className="inline-flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200 cursor-pointer">
+              <input
+                type="checkbox"
+                disabled={!isSuperAdmin}
+                checked={form.aiAssistantEnabled !== false}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    aiAssistantEnabled: e.target.checked,
+                  }))
+                }
+                className="rounded border-slate-300"
+              />
+              Enable Public MAWA AI Assistant Drawer
+            </label>
+            <label className="inline-flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200 cursor-pointer">
+              <input
+                type="checkbox"
+                disabled={!isSuperAdmin}
+                checked={form.newsletterEnabled !== false}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    newsletterEnabled: e.target.checked,
+                  }))
+                }
+                className="rounded border-slate-300"
+              />
+              Enable Public Newsletter Subscription Forms
+            </label>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-200 dark:border-slate-800">
+            <div>
+              <label className="block text-xs font-semibold mb-1">
                 Location / Operations Label
               </label>
               <input
                 type="text"
+                disabled={!isSuperAdmin}
                 value={form.contactLocation}
                 onChange={(e) =>
                   setForm((prev) => ({
@@ -433,7 +633,7 @@ export function AdminSettingsPage() {
                     contactLocation: e.target.value,
                   }))
                 }
-                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] disabled:opacity-60"
               />
             </div>
             <div>
@@ -442,11 +642,12 @@ export function AdminSettingsPage() {
               </label>
               <input
                 type="url"
+                disabled={!isSuperAdmin}
                 value={form.socialGithub}
                 onChange={(e) =>
                   setForm((prev) => ({ ...prev, socialGithub: e.target.value }))
                 }
-                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] disabled:opacity-60"
               />
             </div>
             <div>
@@ -455,6 +656,7 @@ export function AdminSettingsPage() {
               </label>
               <input
                 type="url"
+                disabled={!isSuperAdmin}
                 value={form.socialLinkedin}
                 onChange={(e) =>
                   setForm((prev) => ({
@@ -462,7 +664,7 @@ export function AdminSettingsPage() {
                     socialLinkedin: e.target.value,
                   }))
                 }
-                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] disabled:opacity-60"
               />
             </div>
             <div>
@@ -471,11 +673,12 @@ export function AdminSettingsPage() {
               </label>
               <input
                 type="url"
+                disabled={!isSuperAdmin}
                 value={form.socialX}
                 onChange={(e) =>
                   setForm((prev) => ({ ...prev, socialX: e.target.value }))
                 }
-                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] disabled:opacity-60"
               />
             </div>
             <div>
@@ -484,6 +687,7 @@ export function AdminSettingsPage() {
               </label>
               <input
                 type="url"
+                disabled={!isSuperAdmin}
                 value={form.socialYoutube}
                 onChange={(e) =>
                   setForm((prev) => ({
@@ -491,20 +695,22 @@ export function AdminSettingsPage() {
                     socialYoutube: e.target.value,
                   }))
                 }
-                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] disabled:opacity-60"
               />
             </div>
           </div>
 
-          <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-end">
-            <button
-              type="submit"
-              disabled={saving}
-              className="px-5 py-2.5 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
-            >
-              {saving ? 'Saving...' : 'Save Settings'}
-            </button>
-          </div>
+          {isSuperAdmin && (
+            <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-end">
+              <button
+                type="submit"
+                disabled={saving}
+                className="px-5 py-2.5 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+              >
+                {saving ? 'Saving...' : 'Save Settings'}
+              </button>
+            </div>
+          )}
         </form>
 
         {/* Administrator Roster */}
@@ -581,8 +787,8 @@ export function AdminSettingsPage() {
             </form>
           ) : (
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Signed in with Editor role. Only Super Admins can add or remove
-              administrators.
+              Signed in with Editor role. Only Super Admins can add, modify, or
+              remove administrators.
             </p>
           )}
 
@@ -602,15 +808,28 @@ export function AdminSettingsPage() {
                     </p>
                   </div>
                   {isSuperAdmin && (
-                    <button
-                      type="button"
-                      onClick={() => setRemoveAdminTarget(adm)}
-                      className="p-1.5 text-slate-400 hover:text-red-500 shrink-0"
-                      title="Remove administrator"
-                      aria-label={`Remove ${adm.email}`}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <select
+                        aria-label={`Role for ${adm.email}`}
+                        value={adm.role}
+                        onChange={(e) =>
+                          void handleRoleChange(adm, e.target.value as AdminRole)
+                        }
+                        className="px-2.5 py-1 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
+                      >
+                        <option value="Editor">Editor</option>
+                        <option value="Super Admin">Super Admin</option>
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => setRemoveAdminTarget(adm)}
+                        className="p-1.5 text-slate-400 hover:text-red-500 shrink-0"
+                        title="Remove administrator"
+                        aria-label={`Remove ${adm.email}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   )}
                 </div>
               ))}

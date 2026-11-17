@@ -17,6 +17,14 @@ service firebase.storage {
       );
     }
 
+    function isSuperAdmin() {
+      return isBootstrapAdmin() || (
+        isSignedIn() &&
+        firestore.exists(/databases/ai-studio-80b53fef-edbe-4c89-8e26-45393e1f5d49/documents/administrators/$(request.auth.uid)) &&
+        firestore.get(/databases/ai-studio-80b53fef-edbe-4c89-8e26-45393e1f5d49/documents/administrators/$(request.auth.uid)).data.role == 'Super Admin'
+      );
+    }
+
     function isValidImageUpload() {
       return request.resource != null
         && request.resource.size > 0
@@ -24,14 +32,17 @@ service firebase.storage {
         && request.resource.contentType.matches('image/(png|jpeg|jpg|webp)');
     }
 
-    // Publicly readable media assets uploaded by admins
+    // Publicly readable media assets uploaded by verified administrators.
+    // Folder path preserved for backward compatibility with existing Storage media.
+    // Executables, scripts, and SVGs are strictly blocked; permanent delete requires Super Admin.
     match /nexora-media/{folder}/{fileName} {
       allow read: if true;
       allow create, update: if isAdmin()
         && folder in ['products', 'categories', 'updates', 'brand']
+        && fileName.size() >= 1
         && fileName.size() <= 160
         && isValidImageUpload();
-      allow delete: if isAdmin();
+      allow delete: if isSuperAdmin();
     }
 
     // Default deny

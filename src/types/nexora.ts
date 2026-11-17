@@ -41,6 +41,12 @@ export interface Product {
   seoTitle: string;
   seoDescription: string;
   publicationStatus: PublicationStatus;
+  version?: string;
+  releaseDate?: string;
+  demoVideoUrl?: string;
+  changelog?: string;
+  downloadUrl?: string;
+  relatedProductIds?: string[];
   createdAt?: Timestamp | Date | null;
   updatedAt?: Timestamp | Date | null;
 }
@@ -130,6 +136,11 @@ export interface SiteSettings {
   socialX: string;
   socialLinkedin: string;
   socialYoutube: string;
+  canonicalDomain?: string;
+  ogImageUrl?: string;
+  gaMeasurementId?: string;
+  aiAssistantEnabled?: boolean;
+  newsletterEnabled?: boolean;
   updatedAt?: Timestamp | Date | null;
 }
 
@@ -143,4 +154,193 @@ export interface Administrator {
   displayName: string;
   role: AdminRole;
   createdAt?: Timestamp | Date | null;
+}
+
+export type RoadmapStatus =
+  | 'Planned'
+  | 'Under Consideration'
+  | 'In Progress'
+  | 'Completed';
+
+export interface RoadmapItem {
+  id: string;
+  title: string;
+  description: string;
+  status: RoadmapStatus;
+  category: string;
+  productSlug: string;
+  targetQuarter: string;
+  displayOrder: number;
+  isPublic: boolean;
+  createdAt?: Timestamp | Date | null;
+  updatedAt?: Timestamp | Date | null;
+}
+
+export type RoadmapItemInput = Omit<
+  RoadmapItem,
+  'id' | 'createdAt' | 'updatedAt'
+>;
+
+export type ReviewStatus = 'Pending' | 'Approved' | 'Rejected';
+
+export interface ProductReview {
+  id: string;
+  productId: string;
+  productSlug: string;
+  productName: string;
+  authorName: string;
+  rating: number;
+  title: string;
+  comment: string;
+  suggestion: string;
+  status: ReviewStatus;
+  honeypot: string;
+  createdAt?: Timestamp | Date | null;
+  updatedAt?: Timestamp | Date | null;
+}
+
+export interface ProductReviewInput {
+  productId: string;
+  productSlug: string;
+  productName: string;
+  authorName: string;
+  rating: number;
+  title: string;
+  comment: string;
+  suggestion: string;
+  honeypot: string;
+}
+
+export type DownloadCategory =
+  | 'Windows Application'
+  | 'Android APK'
+  | 'Web Application'
+  | 'Document & Resource';
+
+export interface DownloadItem {
+  id: string;
+  title: string;
+  productId: string;
+  productSlug: string;
+  category: DownloadCategory;
+  version: string;
+  fileSize: string;
+  releaseDate: string;
+  downloadUrl: string;
+  checksumSha256: string;
+  releaseNotes: string;
+  publicationStatus: 'Published' | 'Draft';
+  createdAt?: Timestamp | Date | null;
+  updatedAt?: Timestamp | Date | null;
+}
+
+export type DownloadItemInput = Omit<
+  DownloadItem,
+  'id' | 'createdAt' | 'updatedAt'
+>;
+
+export type NewsletterStatus = 'Subscribed' | 'Unsubscribed';
+
+export interface NewsletterSubscriber {
+  id: string;
+  email: string;
+  status: NewsletterStatus;
+  consent: boolean;
+  source: string;
+  honeypot: string;
+  createdAt?: Timestamp | Date | null;
+  updatedAt?: Timestamp | Date | null;
+}
+
+export interface ActivityLog {
+  id: string;
+  adminUid: string;
+  adminEmail: string;
+  adminRole: AdminRole;
+  actionType: string;
+  targetCollection: string;
+  targetId: string;
+  summary: string;
+  createdAt?: Timestamp | Date | null;
+}
+
+export type AnalyticsEventType =
+  | 'page_view'
+  | 'product_view'
+  | 'download_click'
+  | 'ai_query';
+
+export interface AnalyticsEvent {
+  id: string;
+  eventType: AnalyticsEventType;
+  path: string;
+  productId: string;
+  productSlug: string;
+  referrerSource: string;
+  createdAt?: Timestamp | Date | null;
+}
+
+export interface BackupSnapshot {
+  id: string;
+  label: string;
+  createdByUid: string;
+  createdByEmail: string;
+  summary: string;
+  payloadJson: string;
+  status: 'Ready' | 'Restored';
+  createdAt?: Timestamp | Date | null;
+  updatedAt?: Timestamp | Date | null;
+}
+
+export interface BackupPayload {
+  schemaVersion: string;
+  exportedAt: string;
+  siteSettings: SiteSettingsInput | null;
+  categories: Array<{ id: string } & CategoryInput>;
+  products: Array<{ id: string } & ProductInput>;
+  updates: Array<{ id: string } & UpdateInput>;
+  roadmapItems: Array<{ id: string } & RoadmapItemInput>;
+  downloadItems: Array<{ id: string } & DownloadItemInput>;
+}
+
+export type RecycleEntityType =
+  | 'product'
+  | 'category'
+  | 'update'
+  | 'mediaReference';
+
+export interface RecycleBinItem {
+  id: string;
+  entityType: RecycleEntityType;
+  originalId: string;
+  title: string;
+  snapshotJson: string;
+  deletedByUid: string;
+  deletedByEmail: string;
+  createdAt?: Timestamp | Date | null;
+}
+
+export type NotificationType =
+  | 'contact'
+  | 'review'
+  | 'newsletter'
+  | 'security'
+  | 'system';
+
+export interface AdminNotification {
+  id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  linkPath: string;
+  isRead: boolean;
+  createdAt?: Timestamp | Date | null;
+  updatedAt?: Timestamp | Date | null;
+}
+
+export interface FaqEntry {
+  id: string;
+  category: 'General' | 'Products' | 'Privacy & Security' | 'Developers & API';
+  question: string;
+  answer: string;
 }

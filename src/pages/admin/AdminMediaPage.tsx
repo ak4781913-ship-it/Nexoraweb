@@ -5,6 +5,7 @@ import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { SafeImage } from '../../components/common/SafeImage';
 import { SeoHead } from '../../components/common/SeoHead';
 import { useToast } from '../../components/common/ToastProvider';
+import { useAuth } from '../../context/AuthContext';
 import { GENERATED_ASSETS } from '../../data/defaults';
 import {
   deleteMediaAsset,
@@ -16,12 +17,71 @@ import {
 
 const FOLDERS: MediaFolder[] = ['products', 'categories', 'updates', 'brand'];
 
+async function optimizeImageToWebp(
+  file: File,
+  quality: number,
+  maxWidth = 1600,
+): Promise<{ file: File; originalBytes: number; optimizedBytes: number }> {
+  const originalBytes = file.size;
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      const scale = img.width > maxWidth ? maxWidth / img.width : 1;
+      const targetW = Math.max(1, Math.round(img.width * scale));
+      const targetH = Math.max(1, Math.round(img.height * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = targetW;
+      canvas.height = targetH;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Canvas context unavailable for image optimization.'));
+        return;
+      }
+      ctx.drawImage(img, 0, 0, targetW, targetH);
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            resolve({ file, originalBytes, optimizedBytes: originalBytes });
+            return;
+          }
+          const baseName = file.name.replace(/\.[^.]+$/, '') || 'asset';
+          const webpFile = new File([blob], `${baseName}.webp`, {
+            type: 'image/webp',
+          });
+          if (webpFile.size < file.size) {
+            resolve({
+              file: webpFile,
+              originalBytes,
+              optimizedBytes: webpFile.size,
+            });
+          } else {
+            resolve({ file, originalBytes, optimizedBytes: originalBytes });
+          }
+        },
+        'image/webp',
+        quality,
+      );
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('Could not decode image for optimization.'));
+    };
+    img.src = objectUrl;
+  });
+}
+
 export function AdminMediaPage() {
   const { showToast } = useToast();
+  const { isSuperAdmin } = useAuth();
 
   const [assets, setAssets] = useState<MediaAssetItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedFolder, setSelectedFolder] = useState<MediaFolder>('products');
+  const [optimizeWebp, setOptimizeWebp] = useState(true);
+  const [webpQuality, setWebpQuality] = useState(0.84);
+  const [lastOptSummary, setLastOptSummary] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadPct, setUploadPct] = useState(0);
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
@@ -45,8 +105,21 @@ export function AdminMediaPage() {
   const handleUpload = async (file: File) => {
     setUploading(true);
     setUploadPct(0);
+    setLastOptSummary(null);
     try {
-      await uploadMediaFile(file, selectedFolder, setUploadPct);
+      let fileToUpload = file;
+      if (optimizeWebp) {
+        const result = await optimizeImageToWebp(file, webpQuality);
+        fileToUpload = result.file;
+        const origKb = (result.originalBytes / 1024).toFixed(1);
+        const optKb = (result.optimizedBytes / 1024).toFixed(1);
+        setLastOptSummary(
+          result.optimizedBytes < result.originalBytes
+            ? `Compressed ${origKb} KB -> ${optKb} KB (WebP)`
+            : `Uploaded original (${origKb} KB — already optimal)`,
+        );
+      }
+      await uploadMediaFile(fileToUpload, selectedFolder, setUploadPct);
       showToast('Asset uploaded to Firebase Storage.', 'success');
       await loadAssets();
     } catch (err) {
@@ -108,54 +181,100 @@ export function AdminMediaPage() {
       />
 
       <div className="space-y-8">
-        {/* Upload Box */}
-        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0B1326] p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <h2 className="text-base font-semibold text-slate-900 dark:text-white">
-              Upload Media Asset
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Supports PNG, JPG, or WebP up to 5 MB stored in Firebase Storage.
-            </p>
+        {/* Upload & Client-Side WebP Optimizer Box */}
+        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0B1326] p-6 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <h2 className="text-base font-semibold text-slate-900 dark:text-white">
+                Upload &amp; Optimize Media Asset
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Supports PNG, JPG, or WebP up to 5 MB stored in Firebase Storage.
+                Optional browser-side optimizer resizes images over 1600px and
+                converts to WebP before upload.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <select
+                aria-label="Target folder"
+                value={selectedFolder}
+                onChange={(e) => setSelectedFolder(e.target.value as MediaFolder)}
+                className="px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
+              >
+                {FOLDERS.map((f) => (
+                  <option key={f} value={f}>
+                    Folder: {f}
+                  </option>
+                ))}
+              </select>
+
+              <label className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 cursor-pointer transition-colors whitespace-nowrap">
+                <Upload className="h-4 w-4" />
+                {uploading ? `Uploading ${uploadPct}%` : 'Upload Image'}
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  disabled={uploading}
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = '';
+                    if (file) void handleUpload(file);
+                  }}
+                />
+              </label>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <select
-              aria-label="Target folder"
-              value={selectedFolder}
-              onChange={(e) => setSelectedFolder(e.target.value as MediaFolder)}
-              className="px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
-            >
-              {FOLDERS.map((f) => (
-                <option key={f} value={f}>
-                  Folder: {f}
-                </option>
-              ))}
-            </select>
-
-            <label className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 cursor-pointer transition-colors whitespace-nowrap">
-              <Upload className="h-4 w-4" />
-              {uploading ? `Uploading ${uploadPct}%` : 'Upload Image'}
-              <input
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                disabled={uploading}
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  e.target.value = '';
-                  if (file) void handleUpload(file);
-                }}
-              />
-            </label>
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4 text-xs">
+            <div className="flex flex-wrap items-center gap-4">
+              <label className="inline-flex items-center gap-2 font-medium text-slate-700 dark:text-slate-200 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={optimizeWebp}
+                  onChange={(e) => setOptimizeWebp(e.target.checked)}
+                  className="rounded border-slate-300"
+                />
+                Auto-compress &amp; convert to WebP (max 1600px)
+              </label>
+              {optimizeWebp && (
+                <label className="inline-flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                  <span>Quality:</span>
+                  <input
+                    type="range"
+                    min={0.65}
+                    max={0.95}
+                    step={0.05}
+                    value={webpQuality}
+                    onChange={(e) => setWebpQuality(Number(e.target.value))}
+                  />
+                  <span className="font-mono tabular-nums">
+                    {Math.round(webpQuality * 100)}%
+                  </span>
+                </label>
+              )}
+            </div>
+            {lastOptSummary && (
+              <span className="font-mono text-emerald-600 dark:text-emerald-400">
+                {lastOptSummary}
+              </span>
+            )}
           </div>
         </div>
 
         {/* Uploaded Firebase Storage Assets */}
         <div className="space-y-4">
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
-            Uploaded Storage Assets ({assets.length})
-          </h2>
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
+              Uploaded Storage Assets ({assets.length})
+            </h2>
+            {!isSuperAdmin && (
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Storage asset deletion is restricted to Super Admin accounts.
+              </p>
+            )}
+          </div>
 
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -205,14 +324,16 @@ export function AdminMediaPage() {
                           </>
                         )}
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => setDeleteTarget(item)}
-                        className="p-1 text-slate-400 hover:text-red-500"
-                        title="Delete file"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
+                      {isSuperAdmin && (
+                        <button
+                          type="button"
+                          onClick={() => setDeleteTarget(item)}
+                          className="p-1 text-slate-400 hover:text-red-500"
+                          title="Delete file (Super Admin)"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>

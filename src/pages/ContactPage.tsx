@@ -3,6 +3,7 @@ import { CheckCircle2, Mail, MapPin, Send } from 'lucide-react';
 import { SeoHead } from '../components/common/SeoHead';
 import { useSiteData } from '../context/SiteDataContext';
 import { submitContactMessage } from '../services/firestoreService';
+import { checkClientCooldown, markClientCooldown } from '../utils/rateLimit';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -18,7 +19,6 @@ export function ContactPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [lastSubmitAt, setLastSubmitAt] = useState<number>(0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,9 +29,9 @@ export function ContactPage() {
       return;
     }
 
-    const now = Date.now();
-    if (now - lastSubmitAt < 15000) {
-      setErrorMsg('Please wait a few seconds before sending another message.');
+    const waitSeconds = checkClientCooldown('contact', 15_000);
+    if (waitSeconds > 0) {
+      setErrorMsg(`Please wait ${waitSeconds} seconds before sending another message.`);
       return;
     }
 
@@ -61,7 +61,7 @@ export function ContactPage() {
         message,
         honeypot: '',
       });
-      setLastSubmitAt(Date.now());
+      markClientCooldown('contact');
       setSubmitted(true);
       setName('');
       setEmail('');

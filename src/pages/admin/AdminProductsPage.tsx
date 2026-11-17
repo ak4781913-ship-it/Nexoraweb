@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
+  Archive,
+  Bot,
   Check,
   Edit3,
   ExternalLink,
@@ -17,11 +19,17 @@ import { SafeImage } from '../../components/common/SafeImage';
 import { SeoHead } from '../../components/common/SeoHead';
 import { useToast } from '../../components/common/ToastProvider';
 import { DEFAULT_CATEGORIES } from '../../data/defaults';
+import { useAuth } from '../../context/AuthContext';
 import { useSiteData } from '../../context/SiteDataContext';
+import {
+  requestAdminAiAssist,
+  type AdminAssistResult,
+} from '../../services/aiService';
 import {
   deleteProduct,
   fetchAllCategoriesAdmin,
   fetchAllProductsAdmin,
+  moveEntityToRecycleBin,
   saveProduct,
   slugify,
   toggleProductFeatured,
@@ -81,10 +89,17 @@ const EMPTY_PRODUCT: ProductInput = {
   seoTitle: '',
   seoDescription: '',
   publicationStatus: 'Draft',
+  version: '',
+  releaseDate: '',
+  demoVideoUrl: '',
+  changelog: '',
+  downloadUrl: '',
+  relatedProductIds: [],
 };
 
 export function AdminProductsPage() {
   const { showToast } = useToast();
+  const { isSuperAdmin } = useAuth();
   const { refreshPublicData } = useSiteData();
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -107,6 +122,9 @@ export function AdminProductsPage() {
   const [platformDraft, setPlatformDraft] = useState('');
   const [screenshotUrlDraft, setScreenshotUrlDraft] = useState('');
   const [uploadingField, setUploadingField] = useState<string | null>(null);
+
+  const [aiLoadingTask, setAiLoadingTask] = useState<string | null>(null);
+  const [aiPreview, setAiPreview] = useState<AdminAssistResult | null>(null);
 
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -147,6 +165,7 @@ export function AdminProductsPage() {
     const firstCat = categories[0] || DEFAULT_CATEGORIES[0];
     setEditingId(null);
     setSlugLocked(false);
+    setAiPreview(null);
     setForm({
       ...EMPTY_PRODUCT,
       categoryId: firstCat.id,
@@ -162,6 +181,7 @@ export function AdminProductsPage() {
     );
     setEditingId(p.id);
     setSlugLocked(true);
+    setAiPreview(null);
     setForm({
       name: p.name,
       slug: p.slug,
@@ -185,6 +205,12 @@ export function AdminProductsPage() {
       seoTitle: p.seoTitle,
       seoDescription: p.seoDescription,
       publicationStatus: p.publicationStatus,
+      version: p.version || '',
+      releaseDate: p.releaseDate || '',
+      demoVideoUrl: p.demoVideoUrl || '',
+      changelog: p.changelog || '',
+      downloadUrl: p.downloadUrl || '',
+      relatedProductIds: [...(p.relatedProductIds || [])],
     });
     setEditorOpen(true);
   };
@@ -249,6 +275,20 @@ export function AdminProductsPage() {
       showToast('Official URL must start with https:// or http://', 'error');
       return;
     }
+    if (
+      (form.demoVideoUrl || '').trim() &&
+      !isValidExternalUrl(form.demoVideoUrl || '')
+    ) {
+      showToast('Demo video URL must start with https:// or http://', 'error');
+      return;
+    }
+    if (
+      (form.downloadUrl || '').trim() &&
+      !isValidExternalUrl(form.downloadUrl || '')
+    ) {
+      showToast('Download URL must start with https:// or http://', 'error');
+      return;
+    }
     if (form.logoUrl.trim() && !isSafeAssetUrl(form.logoUrl)) {
       showToast('Logo URL must be a valid https://, http://, or local asset path.', 'error');
       return;
@@ -311,6 +351,86 @@ export function AdminProductsPage() {
         'error',
       );
     }
+  };
+
+  const handleArchiveProduct = async (p: Product) => {
+    try {
+      const { createdAt: _c, updatedAt: _u, ...snapshot } = p;
+      await moveEntityToRecycleBin({
+        entityType: 'product',
+        originalId: p.id,
+        title: p.name,
+        snapshot,
+      });
+      showToast(`"${p.name}" archived to Recycle Bin.`, 'success');
+      await Promise.all([loadData(), refreshPublicData()]);
+    } catch (err) {
+      showToast(
+        err instanceof Error ? err.message : 'Archive failed.',
+        'error',
+      );
+    }
+  };
+
+  const handleRunAiAssist = async (
+    task: 'description' | 'seo' | 'tags' | 'polish',
+  ) => {
+    if (!form.name.trim()) {
+      showToast('Enter a Product Name first so the AI assistant has context.', 'error');
+      return;
+    }
+    setAiLoadingTask(task);
+    try {
+      const draftSource = [form.shortDescription, form.fullDescription]
+        .filter(Boolean)
+        .join('\n\n')
+        .slice(0, 2500);
+      const result = await requestAdminAiAssist({
+        task,
+        productName: form.name.trim(),
+        draftText: draftSource,
+        categoryName: form.categoryName,
+        productType: form.productType,
+      });
+      setAiPreview(result);
+    } catch (err) {
+      showToast(
+        err instanceof Error ? err.message : 'AI assistant request failed.',
+        'error',
+      );
+    } finally {
+      setAiLoadingTask(null);
+    }
+  };
+
+  const handleApplyAiPreview = () => {
+    if (!aiPreview) return;
+    setForm((prev) => ({
+      ...prev,
+      shortDescription: aiPreview.shortDescription
+        ? aiPreview.shortDescription.slice(0, 280)
+        : prev.shortDescription,
+      fullDescription: aiPreview.fullDescription
+        ? aiPreview.fullDescription.slice(0, 15000)
+        : aiPreview.polishedText
+          ? aiPreview.polishedText.slice(0, 15000)
+          : prev.fullDescription,
+      seoTitle: aiPreview.seoTitle
+        ? aiPreview.seoTitle.slice(0, 140)
+        : prev.seoTitle,
+      seoDescription: aiPreview.seoDescription
+        ? aiPreview.seoDescription.slice(0, 320)
+        : prev.seoDescription,
+      tags:
+        aiPreview.suggestedTags && aiPreview.suggestedTags.length > 0
+          ? Array.from(new Set([...prev.tags, ...aiPreview.suggestedTags])).slice(
+              0,
+              15,
+            )
+          : prev.tags,
+    }));
+    showToast('AI draft applied to product form. Review before saving.', 'success');
+    setAiPreview(null);
   };
 
   const confirmDelete = async () => {
@@ -528,12 +648,22 @@ export function AdminProductsPage() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => setDeleteTarget(p)}
-                          title="Delete Product"
-                          className="p-1.5 rounded-md text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                          onClick={() => void handleArchiveProduct(p)}
+                          title="Move to Recycle Bin"
+                          className="p-1.5 rounded-md text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Archive className="h-4 w-4" />
                         </button>
+                        {isSuperAdmin && (
+                          <button
+                            type="button"
+                            onClick={() => setDeleteTarget(p)}
+                            title="Permanently Delete Product"
+                            className="p-1.5 rounded-md text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -629,6 +759,97 @@ export function AdminProductsPage() {
                   }
                   className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] text-slate-900 dark:text-white"
                 />
+              </div>
+
+              {/* AI Content Assistant */}
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-[#060B19] p-4 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-100">
+                    <Bot className="h-4 w-4 text-blue-600 dark:text-cyan-400" />
+                    AI Content Assistant (Admin Review Required Before Saving)
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {(
+                      [
+                        { task: 'description', label: 'Draft Overview' },
+                        { task: 'seo', label: 'Generate SEO' },
+                        { task: 'tags', label: 'Suggest Tags' },
+                        { task: 'polish', label: 'Polish Copy' },
+                      ] as const
+                    ).map((btn) => (
+                      <button
+                        key={btn.task}
+                        type="button"
+                        disabled={Boolean(aiLoadingTask)}
+                        onClick={() => void handleRunAiAssist(btn.task)}
+                        className="px-2.5 py-1 text-xs font-medium rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0B1326] text-slate-700 dark:text-slate-200 hover:border-blue-500 disabled:opacity-60 transition-colors"
+                      >
+                        {aiLoadingTask === btn.task ? 'Working...' : btn.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {aiPreview && (
+                  <div className="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2 text-xs">
+                    {aiPreview.shortDescription && (
+                      <p>
+                        <strong className="text-slate-700 dark:text-slate-200">
+                          Short Description:
+                        </strong>{' '}
+                        {aiPreview.shortDescription}
+                      </p>
+                    )}
+                    {(aiPreview.fullDescription || aiPreview.polishedText) && (
+                      <p className="whitespace-pre-line text-slate-600 dark:text-slate-300 max-h-36 overflow-y-auto">
+                        <strong className="text-slate-700 dark:text-slate-200">
+                          Full Copy:
+                        </strong>{' '}
+                        {aiPreview.fullDescription || aiPreview.polishedText}
+                      </p>
+                    )}
+                    {aiPreview.seoTitle && (
+                      <p>
+                        <strong className="text-slate-700 dark:text-slate-200">
+                          SEO Title:
+                        </strong>{' '}
+                        {aiPreview.seoTitle}
+                      </p>
+                    )}
+                    {aiPreview.seoDescription && (
+                      <p>
+                        <strong className="text-slate-700 dark:text-slate-200">
+                          SEO Description:
+                        </strong>{' '}
+                        {aiPreview.seoDescription}
+                      </p>
+                    )}
+                    {aiPreview.suggestedTags && aiPreview.suggestedTags.length > 0 && (
+                      <p>
+                        <strong className="text-slate-700 dark:text-slate-200">
+                          Suggested Tags:
+                        </strong>{' '}
+                        {aiPreview.suggestedTags.join(', ')}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={handleApplyAiPreview}
+                        className="px-3 py-1.5 text-xs font-semibold rounded-md bg-blue-600 text-white hover:bg-blue-700"
+                      >
+                        Apply to Form
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAiPreview(null)}
+                        className="px-3 py-1.5 text-xs font-medium rounded-md border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
+                      >
+                        Dismiss
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -1211,6 +1432,143 @@ export function AdminProductsPage() {
                     ))}
                   </div>
                 </div>
+              </div>
+
+              {/* Version, Release Date, Demo Video, Download & Changelog */}
+              <div className="space-y-4 pt-2 border-t border-slate-200 dark:border-slate-800">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                      Current Version
+                    </label>
+                    <input
+                      type="text"
+                      maxLength={40}
+                      placeholder="v1.0.0"
+                      value={form.version || ''}
+                      onChange={(e) =>
+                        setForm((prev) => ({ ...prev, version: e.target.value }))
+                      }
+                      className="w-full px-3 py-2 text-sm font-mono rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                      Release Date
+                    </label>
+                    <input
+                      type="date"
+                      value={form.releaseDate || ''}
+                      onChange={(e) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          releaseDate: e.target.value,
+                        }))
+                      }
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                      Demo Video URL
+                    </label>
+                    <input
+                      type="url"
+                      maxLength={1000}
+                      placeholder="https://youtube.com/..."
+                      value={form.demoVideoUrl || ''}
+                      onChange={(e) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          demoVideoUrl: e.target.value,
+                        }))
+                      }
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                      Direct Download URL
+                    </label>
+                    <input
+                      type="url"
+                      maxLength={1000}
+                      placeholder="https://..."
+                      value={form.downloadUrl || ''}
+                      onChange={(e) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          downloadUrl: e.target.value,
+                        }))
+                      }
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                    Release Changelog / Version Notes
+                  </label>
+                  <textarea
+                    rows={3}
+                    maxLength={8000}
+                    placeholder="Document recent updates, performance improvements, or bug fixes..."
+                    value={form.changelog || ''}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, changelog: e.target.value }))
+                    }
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19]"
+                  />
+                </div>
+
+                {products.filter((p) => p.id !== editingId).length > 0 && (
+                  <div className="space-y-2">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                      Related Products ({(form.relatedProductIds || []).length}/6)
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {products
+                        .filter((p) => p.id !== editingId)
+                        .map((other) => {
+                          const selected = (form.relatedProductIds || []).includes(
+                            other.id,
+                          );
+                          return (
+                            <button
+                              key={other.id}
+                              type="button"
+                              onClick={() =>
+                                setForm((prev) => {
+                                  const curr = prev.relatedProductIds || [];
+                                  if (curr.includes(other.id)) {
+                                    return {
+                                      ...prev,
+                                      relatedProductIds: curr.filter(
+                                        (id) => id !== other.id,
+                                      ),
+                                    };
+                                  }
+                                  if (curr.length >= 6) return prev;
+                                  return {
+                                    ...prev,
+                                    relatedProductIds: [...curr, other.id],
+                                  };
+                                })
+                              }
+                              className={`px-2.5 py-1 text-xs rounded-md border transition-colors ${
+                                selected
+                                  ? 'bg-blue-600 text-white border-blue-600'
+                                  : 'bg-slate-50 dark:bg-[#060B19] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                              }`}
+                            >
+                              {other.name}
+                            </button>
+                          );
+                        })}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* SEO Metadata */}

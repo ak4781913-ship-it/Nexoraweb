@@ -4,6 +4,7 @@ import { AdminLayout } from '../../components/admin/AdminLayout';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { SeoHead } from '../../components/common/SeoHead';
 import { useToast } from '../../components/common/ToastProvider';
+import { useAuth } from '../../context/AuthContext';
 import {
   deleteContactMessage,
   fetchContactMessagesAdmin,
@@ -21,6 +22,7 @@ const STATUS_FILTERS: Array<'All' | ContactStatus> = [
 
 export function AdminMessagesPage() {
   const { showToast } = useToast();
+  const { isSuperAdmin } = useAuth();
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<'All' | ContactStatus>('All');
@@ -216,14 +218,16 @@ export function AdminMessagesPage() {
                       <option value="Replied">Replied</option>
                       <option value="Archived">Archived</option>
                     </select>
-                    <button
-                      type="button"
-                      onClick={() => setDeleteTarget(selected)}
-                      className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-red-600"
-                      title="Delete Message"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    {isSuperAdmin && (
+                      <button
+                        type="button"
+                        onClick={() => setDeleteTarget(selected)}
+                        className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-red-600"
+                        title="Delete Message (Super Admin)"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
 

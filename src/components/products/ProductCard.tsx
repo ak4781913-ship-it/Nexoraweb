@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
+  Check,
   CheckCircle2,
   Clock,
   ExternalLink,
+  Scale,
   Wrench,
 } from 'lucide-react';
 import type { Product } from '../../types/nexora';
@@ -41,7 +43,15 @@ function getStatusIndicator(status: Product['publicationStatus']) {
   }
 }
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({
+  product,
+  isCompared = false,
+  onToggleCompare,
+}: {
+  product: Product;
+  isCompared?: boolean;
+  onToggleCompare?: (product: Product) => void;
+}) {
   const statusInfo = getStatusIndicator(product.publicationStatus);
   const StatusIcon = statusInfo.Icon;
   const hasWebsite = isValidExternalUrl(product.officialWebsiteUrl);
@@ -49,7 +59,13 @@ export function ProductCard({ product }: { product: Product }) {
     product.coverImageUrl || product.screenshotGallery[0] || '';
 
   return (
-    <article className="group flex flex-col rounded-xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0B1326] overflow-hidden transition-colors hover:border-blue-500/50 dark:hover:border-blue-500/40">
+    <article
+      className={`group flex flex-col rounded-xl border bg-white dark:bg-[#0B1326] overflow-hidden transition-colors ${
+        isCompared
+          ? 'border-blue-600 ring-1 ring-blue-600/40'
+          : 'border-slate-200 dark:border-slate-800/80 hover:border-blue-500/50 dark:hover:border-blue-500/40'
+      }`}
+    >
       <Link
         to={`/products/${product.slug}`}
         className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100 dark:bg-[#0F1830] block"
@@ -83,6 +99,12 @@ export function ProductCard({ product }: { product: Product }) {
             <StatusIcon className="h-3.5 w-3.5" aria-hidden="true" />
             {statusInfo.label}
           </span>
+          {product.version && (
+            <>
+              <span aria-hidden="true">&middot;</span>
+              <span className="font-mono text-[11px]">{product.version}</span>
+            </>
+          )}
         </div>
 
         <h3 className="mt-2.5 text-lg font-semibold text-slate-900 dark:text-white tracking-tight">
@@ -98,7 +120,7 @@ export function ProductCard({ product }: { product: Product }) {
           {product.shortDescription}
         </p>
 
-        <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3">
+        <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2">
           <Link
             to={`/products/${product.slug}`}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg bg-slate-900 dark:bg-blue-600 text-white hover:bg-slate-800 dark:hover:bg-blue-500 transition-colors whitespace-nowrap shrink-0"
@@ -107,26 +129,48 @@ export function ProductCard({ product }: { product: Product }) {
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
 
-          {hasWebsite ? (
-            <a
-              href={product.officialWebsiteUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/70 transition-colors whitespace-nowrap shrink-0"
-            >
-              Visit Website
-              <ExternalLink className="h-3.5 w-3.5" />
-            </a>
-          ) : (
-            <button
-              type="button"
-              disabled
-              title="Official website link will be available once released"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed whitespace-nowrap shrink-0"
-            >
-              Website Pending
-            </button>
-          )}
+          <div className="flex items-center gap-1.5">
+            {onToggleCompare && (
+              <button
+                type="button"
+                onClick={() => onToggleCompare(product)}
+                title={isCompared ? 'Remove from comparison' : 'Compare product'}
+                aria-label={isCompared ? 'Remove from comparison' : 'Compare product'}
+                className={`inline-flex items-center justify-center h-8 w-8 rounded-lg border transition-colors ${
+                  isCompared
+                    ? 'border-blue-600 bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-cyan-400'
+                    : 'border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/70'
+                }`}
+              >
+                {isCompared ? (
+                  <Check className="h-3.5 w-3.5" />
+                ) : (
+                  <Scale className="h-3.5 w-3.5" />
+                )}
+              </button>
+            )}
+
+            {hasWebsite ? (
+              <a
+                href={product.officialWebsiteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/70 transition-colors whitespace-nowrap shrink-0"
+              >
+                Visit
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            ) : (
+              <button
+                type="button"
+                disabled
+                title="Official website link will be available once released"
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed whitespace-nowrap shrink-0"
+              >
+                Pending
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </article>

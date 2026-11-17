@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useSiteData } from '../../context/SiteDataContext';
 
 interface SeoHeadProps {
   title: string;
@@ -7,7 +8,10 @@ interface SeoHeadProps {
   ogType?: 'website' | 'article';
   ogImage?: string;
   noIndex?: boolean;
-  structuredData?: Record<string, unknown> | null;
+  structuredData?:
+    | Record<string, unknown>
+    | Array<Record<string, unknown>>
+    | null;
 }
 
 function upsertMeta(attr: 'name' | 'property', key: string, content: string) {
@@ -31,9 +35,14 @@ export function SeoHead({
   noIndex = false,
   structuredData,
 }: SeoHeadProps) {
+  const { settings } = useSiteData();
+
   useEffect(() => {
     document.title = title;
-    const origin = window.location.origin;
+    const configuredDomain = (settings.canonicalDomain || '')
+      .trim()
+      .replace(/\/+$/, '');
+    const origin = configuredDomain || window.location.origin;
     const canonicalUrl = canonicalPath
       ? `${origin}${canonicalPath}`
       : `${origin}${window.location.pathname}`;
@@ -51,7 +60,7 @@ export function SeoHead({
     upsertMeta('name', 'twitter:title', title);
     upsertMeta('name', 'twitter:description', description);
 
-    const effectiveOgImage = ogImage || '/mawa-og.png';
+    const effectiveOgImage = ogImage || settings.ogImageUrl || '/mawa-og.png';
     const fullImg = effectiveOgImage.startsWith('http')
       ? effectiveOgImage
       : `${origin}${effectiveOgImage}`;
@@ -68,24 +77,43 @@ export function SeoHead({
     }
     canonical.setAttribute('href', canonicalUrl);
 
-    const existingScript = document.getElementById('mawa-dynamic-jsonld');
-    if (existingScript) {
-      existingScript.remove();
-    }
+    document
+      .querySelectorAll('script[data-mawa-jsonld="true"]')
+      .forEach((node) => node.remove());
+
+    const legacyScript = document.getElementById('mawa-dynamic-jsonld');
+    if (legacyScript) legacyScript.remove();
 
     if (structuredData) {
-      const script = document.createElement('script');
-      script.id = 'mawa-dynamic-jsonld';
-      script.type = 'application/ld+json';
-      script.textContent = JSON.stringify(structuredData);
-      document.head.appendChild(script);
+      const schemas = Array.isArray(structuredData)
+        ? structuredData
+        : [structuredData];
+      schemas.forEach((schema, idx) => {
+        const script = document.createElement('script');
+        script.id = idx === 0 ? 'mawa-dynamic-jsonld' : `mawa-dynamic-jsonld-${idx}`;
+        script.setAttribute('data-mawa-jsonld', 'true');
+        script.type = 'application/ld+json';
+        script.textContent = JSON.stringify(schema);
+        document.head.appendChild(script);
+      });
     }
 
     return () => {
-      const script = document.getElementById('mawa-dynamic-jsonld');
-      if (script) script.remove();
+      document
+        .querySelectorAll('script[data-mawa-jsonld="true"]')
+        .forEach((node) => node.remove());
     };
-  }, [title, description, canonicalPath, ogType, ogImage, noIndex, structuredData]);
+  }, [
+    title,
+    description,
+    canonicalPath,
+    ogType,
+    ogImage,
+    noIndex,
+    structuredData,
+    settings.canonicalDomain,
+    settings.ogImageUrl,
+  ]);
 
   return null;
 }

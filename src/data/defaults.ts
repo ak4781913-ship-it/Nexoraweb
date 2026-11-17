@@ -1,6 +1,9 @@
 import type {
   CategoryInput,
+  DownloadItem,
+  FaqEntry,
   ProductInput,
+  RoadmapItem,
   SiteSettingsInput,
   UpdateInput,
 } from '../types/nexora';
@@ -35,6 +38,11 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsInput = {
   socialX: '',
   socialLinkedin: '',
   socialYoutube: '',
+  canonicalDomain: '',
+  ogImageUrl: '/mawa-og.png',
+  gaMeasurementId: '',
+  aiAssistantEnabled: true,
+  newsletterEnabled: true,
 };
 
 export const DEFAULT_CATEGORIES: Array<{ id: string } & CategoryInput> = [
@@ -164,6 +172,12 @@ export const PLANNED_DRAFT_PRODUCTS: Array<{ id: string } & ProductInput> = [
     seoDescription:
       'Planned MAWA digital utilities hub providing accessible browser tools.',
     publicationStatus: 'Draft',
+    version: '1.0.0-alpha',
+    releaseDate: '',
+    demoVideoUrl: '',
+    changelog: '',
+    downloadUrl: '',
+    relatedProductIds: [],
   },
   {
     id: 'nexora-beauty-tips',
@@ -197,6 +211,12 @@ export const PLANNED_DRAFT_PRODUCTS: Array<{ id: string } & ProductInput> = [
     seoDescription:
       'Planned MAWA lifestyle platform dedicated to practical beauty and skincare guidance.',
     publicationStatus: 'Draft',
+    version: '',
+    releaseDate: '',
+    demoVideoUrl: '',
+    changelog: '',
+    downloadUrl: '',
+    relatedProductIds: [],
   },
   {
     id: 'nexora-prompt-studio',
@@ -230,6 +250,12 @@ export const PLANNED_DRAFT_PRODUCTS: Array<{ id: string } & ProductInput> = [
     seoDescription:
       'Planned MAWA AI Tool for crafting and managing structured prompts.',
     publicationStatus: 'Draft',
+    version: '',
+    releaseDate: '',
+    demoVideoUrl: '',
+    changelog: '',
+    downloadUrl: '',
+    relatedProductIds: [],
   },
   {
     id: 'nexora-language-academy',
@@ -263,6 +289,12 @@ export const PLANNED_DRAFT_PRODUCTS: Array<{ id: string } & ProductInput> = [
     seoDescription:
       'Planned MAWA education platform for practical language learning.',
     publicationStatus: 'Draft',
+    version: '',
+    releaseDate: '',
+    demoVideoUrl: '',
+    changelog: '',
+    downloadUrl: '',
+    relatedProductIds: [],
   },
   {
     id: 'nexora-homemade',
@@ -296,6 +328,12 @@ export const PLANNED_DRAFT_PRODUCTS: Array<{ id: string } & ProductInput> = [
     seoDescription:
       'Planned MAWA digital platform for homemade recipes and step-by-step guides.',
     publicationStatus: 'Draft',
+    version: '',
+    releaseDate: '',
+    demoVideoUrl: '',
+    changelog: '',
+    downloadUrl: '',
+    relatedProductIds: [],
   },
 ];
 
@@ -327,5 +365,103 @@ export const DEFAULT_UPDATES: Array<{ id: string } & UpdateInput> = [
     coverImageUrl: GENERATED_ASSETS.ecosystemAi,
     publishedAt: '2026-11-15',
     publicationStatus: 'Published',
+  },
+];
+
+export const DEFAULT_ROADMAP_ITEMS: RoadmapItem[] = [
+  {
+    id: 'roadmap-platform-v2',
+    title: 'MAWA Ecosystem Hub & AI Discovery',
+    description:
+      'Central catalog upgrade with AI Product Recommender, public roadmap tracking, unified downloads, and verified review moderation.',
+    status: 'Completed',
+    category: 'Platform',
+    productSlug: '',
+    targetQuarter: 'Q4 2026',
+    displayOrder: 1,
+    isPublic: true,
+  },
+  {
+    id: 'roadmap-free-tools',
+    title: 'MAWA Free Tools Hub Public Release',
+    description:
+      'Browser-native text, media, JSON, and productivity utilities designed for instant privacy-preserving execution.',
+    status: 'In Progress',
+    category: 'Free Tools & Utilities',
+    productSlug: 'mawa-free-tools-hub',
+    targetQuarter: 'Q1 2027',
+    displayOrder: 2,
+    isPublic: true,
+  },
+  {
+    id: 'roadmap-prompt-studio',
+    title: 'MAWA Prompt Studio v1.0',
+    description:
+      'Structured prompt engineering library with reusable templates, version history, and team workflows.',
+    status: 'Planned',
+    category: 'AI & Innovation',
+    productSlug: 'mawa-prompt-studio',
+    targetQuarter: 'Q1 2027',
+    displayOrder: 3,
+    isPublic: true,
+  },
+  {
+    id: 'roadmap-language-academy',
+    title: 'MAWA Language Academy Curriculum Pilot',
+    description:
+      'Bite-sized daily communication drills and structured vocabulary progression.',
+    status: 'Under Consideration',
+    category: 'Education & Learning',
+    productSlug: 'mawa-language-academy',
+    targetQuarter: 'Q2 2027',
+    displayOrder: 4,
+    isPublic: true,
+  },
+];
+
+export const DEFAULT_DOWNLOAD_ITEMS: DownloadItem[] = [];
+
+export const DEFAULT_FAQ_ITEMS: FaqEntry[] = [
+  {
+    id: 'faq-what-is-mawa',
+    category: 'General',
+    question: 'What is MAWA?',
+    answer:
+      'MAWA ("A Legacy of Innovation.") is an independent digital products and technology innovation studio. This platform serves as the official directory, release hub, and support gateway for all MAWA web applications, AI tools, mobile apps, and online platforms.',
+  },
+  {
+    id: 'faq-pricing',
+    category: 'Products',
+    question: 'Are MAWA digital products free to use?',
+    answer:
+      'Each product operates on a transparent Free, Freemium, or Premium model clearly marked on its directory card and product detail page. Many MAWA utilities and guides are built to remain free and accessible in the browser.',
+  },
+  {
+    id: 'faq-drafts-roadmap',
+    category: 'Products',
+    question: 'When do "Coming Soon" or Roadmap products launch?',
+    answer:
+      'Products move through Planned, Under Development, Coming Soon, and Live stages only after completing engineering verification and URL checks. You can track progress on the Roadmap page or subscribe to email updates.',
+  },
+  {
+    id: 'faq-downloads-safety',
+    category: 'Privacy & Security',
+    question: 'How are files in the MAWA Download Center verified?',
+    answer:
+      'Every downloadable release published by administrators points to an authenticated HTTPS distribution link, lists file version and size metadata, and supports SHA-256 checksum verification before installation.',
+  },
+  {
+    id: 'faq-privacy-data',
+    category: 'Privacy & Security',
+    question: 'How does MAWA handle contact inquiries and reviews?',
+    answer:
+      'Contact inquiries and newsletter email addresses are strictly isolated behind administrator-only Firestore rules and never exposed publicly. Product reviews remain in Pending moderation until approved by an authorized MAWA administrator.',
+  },
+  {
+    id: 'faq-business-api',
+    category: 'Developers & API',
+    question: 'Can organizations partner with MAWA or request custom integrations?',
+    answer:
+      'Yes. Visit our Partnerships or Business Inquiries page to submit collaboration proposals, licensing requests, or technical integration questions directly to our team.',
   },
 ];

@@ -1,0 +1,35 @@
+name: MAWA CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: TypeScript typecheck
+        run: npm run lint
+      - name: Firestore security rules lint
+        run: npm run lint:rules
+      - name: Production frontend build & sitemap
+        run: npm run build
+      - name: Verify production dist artifacts and secret hygiene
+        run: |
+          test -f dist/index.html
+          test -f dist/.htaccess
+          test -f dist/sitemap.xml
+          test -f dist/robots.txt
+          if grep -rnE "GEMINI_API_KEY|UPSTASH_REDIS_REST_TOKEN|MY_GEMINI_API_KEY" dist/; then
+            echo "ERROR: Server secret identifier leaked into dist/!"
+            exit 1
+          fi

@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Edit3, Plus, Trash2, Upload, X } from 'lucide-react';
+import { Archive, Edit3, Plus, Trash2, Upload, X } from 'lucide-react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { SeoHead } from '../../components/common/SeoHead';
 import { useToast } from '../../components/common/ToastProvider';
+import { useAuth } from '../../context/AuthContext';
 import { useSiteData } from '../../context/SiteDataContext';
 import {
   deleteUpdatePost,
   fetchAllUpdatesAdmin,
+  moveEntityToRecycleBin,
   saveUpdatePost,
   slugify,
 } from '../../services/firestoreService';
@@ -34,6 +36,7 @@ const EMPTY_UPDATE: UpdateInput = {
 
 export function AdminUpdatesPage() {
   const { showToast } = useToast();
+  const { isSuperAdmin } = useAuth();
   const { refreshPublicData } = useSiteData();
 
   const [updates, setUpdates] = useState<UpdatePost[]>([]);
@@ -153,6 +156,25 @@ export function AdminUpdatesPage() {
     } catch (err) {
       showToast(
         err instanceof Error ? err.message : 'Status toggle failed.',
+        'error',
+      );
+    }
+  };
+
+  const handleArchiveUpdate = async (post: UpdatePost) => {
+    try {
+      const { createdAt: _c, updatedAt: _u, ...snapshot } = post;
+      await moveEntityToRecycleBin({
+        entityType: 'update',
+        originalId: post.id,
+        title: post.title,
+        snapshot,
+      });
+      showToast(`"${post.title}" archived to Recycle Bin.`, 'success');
+      await Promise.all([loadUpdates(), refreshPublicData()]);
+    } catch (err) {
+      showToast(
+        err instanceof Error ? err.message : 'Archive failed.',
         'error',
       );
     }
@@ -278,12 +300,22 @@ export function AdminUpdatesPage() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => setDeleteTarget(post)}
-                        className="p-1.5 rounded-md text-slate-500 hover:text-red-600 hover:bg-slate-100 dark:hover:bg-slate-800"
-                        title="Delete"
+                        onClick={() => void handleArchiveUpdate(post)}
+                        className="p-1.5 rounded-md text-slate-500 hover:text-amber-600 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        title="Move to Recycle Bin"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Archive className="h-4 w-4" />
                       </button>
+                      {isSuperAdmin && (
+                        <button
+                          type="button"
+                          onClick={() => setDeleteTarget(post)}
+                          className="p-1.5 rounded-md text-slate-500 hover:text-red-600 hover:bg-slate-100 dark:hover:bg-slate-800"
+                          title="Permanently Delete"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

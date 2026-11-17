@@ -9,8 +9,10 @@ const NAV_LINKS = [
   { to: '/', label: 'Home', end: true },
   { to: '/products', label: 'Products' },
   { to: '/categories', label: 'Categories' },
-  { to: '/about', label: 'About' },
+  { to: '/roadmap', label: 'Roadmap' },
+  { to: '/downloads', label: 'Downloads' },
   { to: '/updates', label: "What's New" },
+  { to: '/about', label: 'About' },
   { to: '/contact', label: 'Contact' },
 ];
 
@@ -49,11 +51,11 @@ export function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/90 dark:bg-[#060B19]/90 backdrop-blur-md transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4 xl:gap-8">
           <Link
             to="/"
             onClick={() => setMobileOpen(false)}
-            className="focus-visible:outline-2 focus-visible:outline-blue-600 rounded-md"
+            className="focus-visible:outline-2 focus-visible:outline-blue-600 rounded-md shrink-0"
           >
             <NexoraLogo
               logoUrl={settings.brandLogoUrl}
@@ -63,7 +65,7 @@ export function Navbar() {
 
           <nav
             aria-label="Primary Navigation"
-            className="hidden lg:flex items-center gap-7"
+            className="hidden lg:flex items-center gap-5 xl:gap-6"
           >
             {NAV_LINKS.map((item) => (
               <NavLink

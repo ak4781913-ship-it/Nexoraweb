@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
+  Archive,
   ArrowDown,
   ArrowUp,
   Edit3,
@@ -16,10 +17,12 @@ import {
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { SeoHead } from '../../components/common/SeoHead';
 import { useToast } from '../../components/common/ToastProvider';
+import { useAuth } from '../../context/AuthContext';
 import { useSiteData } from '../../context/SiteDataContext';
 import {
   deleteCategory,
   fetchAllCategoriesAdmin,
+  moveEntityToRecycleBin,
   saveCategory,
   slugify,
 } from '../../services/firestoreService';
@@ -39,6 +42,7 @@ const EMPTY_CATEGORY: CategoryInput = {
 
 export function AdminCategoriesPage() {
   const { showToast } = useToast();
+  const { isSuperAdmin } = useAuth();
   const { refreshPublicData } = useSiteData();
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -194,6 +198,25 @@ export function AdminCategoriesPage() {
     }
   };
 
+  const handleArchiveCategory = async (cat: Category) => {
+    try {
+      const { createdAt: _c, updatedAt: _u, ...snapshot } = cat;
+      await moveEntityToRecycleBin({
+        entityType: 'category',
+        originalId: cat.id,
+        title: cat.name,
+        snapshot,
+      });
+      showToast(`"${cat.name}" hidden and archived to Recycle Bin.`, 'success');
+      await Promise.all([loadCategories(), refreshPublicData()]);
+    } catch (err) {
+      showToast(
+        err instanceof Error ? err.message : 'Failed to archive category.',
+        'error',
+      );
+    }
+  };
+
   const confirmDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -341,12 +364,22 @@ export function AdminCategoriesPage() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => setDeleteTarget(cat)}
-                        className="p-1.5 rounded-md text-slate-500 hover:text-red-600 hover:bg-slate-100 dark:hover:bg-slate-800"
-                        title="Delete Category"
+                        onClick={() => void handleArchiveCategory(cat)}
+                        className="p-1.5 rounded-md text-slate-500 hover:text-amber-600 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        title="Move to Recycle Bin"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Archive className="h-4 w-4" />
                       </button>
+                      {isSuperAdmin && (
+                        <button
+                          type="button"
+                          onClick={() => setDeleteTarget(cat)}
+                          className="p-1.5 rounded-md text-slate-500 hover:text-red-600 hover:bg-slate-100 dark:hover:bg-slate-800"
+                          title="Permanently Delete Category"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

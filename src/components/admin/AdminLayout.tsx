@@ -1,18 +1,28 @@
 import React, { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import {
+  Activity,
+  BarChart3,
+  Bell,
+  DatabaseBackup,
+  Download,
   ExternalLink,
   FolderTree,
+  Globe,
   Image as ImageIcon,
   LayoutDashboard,
   LogOut,
   Mail,
+  Map,
   Megaphone,
   Menu,
+  MessageSquareQuote,
   Moon,
+  Newspaper,
   Package,
   Settings,
   Sun,
+  Trash2,
   X,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -20,14 +30,59 @@ import { useSiteData } from '../../context/SiteDataContext';
 import { useTheme } from '../../context/ThemeContext';
 import { NexoraLogo } from '../common/NexoraLogo';
 
-const ADMIN_NAV = [
-  { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/admin/products', label: 'Products', icon: Package },
-  { to: '/admin/categories', label: 'Categories', icon: FolderTree },
-  { to: '/admin/media', label: 'Media Library', icon: ImageIcon },
-  { to: '/admin/updates', label: 'Updates', icon: Megaphone },
-  { to: '/admin/messages', label: 'Messages', icon: Mail },
-  { to: '/admin/settings', label: 'Settings', icon: Settings },
+interface NavSection {
+  heading: string;
+  items: Array<{
+    to: string;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    superAdminOnly?: boolean;
+  }>;
+}
+
+const ADMIN_NAV_SECTIONS: NavSection[] = [
+  {
+    heading: 'Overview',
+    items: [
+      { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { to: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+      { to: '/admin/notifications', label: 'Notifications', icon: Bell },
+    ],
+  },
+  {
+    heading: 'Catalog & Media',
+    items: [
+      { to: '/admin/products', label: 'Products', icon: Package },
+      { to: '/admin/categories', label: 'Categories', icon: FolderTree },
+      { to: '/admin/updates', label: 'Updates', icon: Megaphone },
+      { to: '/admin/media', label: 'Media Library', icon: ImageIcon },
+      { to: '/admin/roadmap', label: 'Roadmap', icon: Map },
+      { to: '/admin/downloads', label: 'Downloads', icon: Download },
+    ],
+  },
+  {
+    heading: 'Community & Inbox',
+    items: [
+      { to: '/admin/reviews', label: 'Reviews', icon: MessageSquareQuote },
+      { to: '/admin/messages', label: 'Messages', icon: Mail },
+      { to: '/admin/newsletter', label: 'Newsletter', icon: Newspaper },
+    ],
+  },
+  {
+    heading: 'System & SEO',
+    items: [
+      { to: '/admin/seo', label: 'SEO & Sitemap', icon: Globe },
+      { to: '/admin/logs', label: 'Activity Logs', icon: Activity },
+      { to: '/admin/recycle-bin', label: 'Recycle Bin', icon: Trash2 },
+      {
+        to: '/admin/backups',
+        label: 'Backups',
+        icon: DatabaseBackup,
+        superAdminOnly: true,
+      },
+      { to: '/admin/settings', label: 'Settings', icon: Settings },
+    ],
+  },
 ];
 
 export function AdminLayout({
@@ -41,7 +96,7 @@ export function AdminLayout({
   actions?: React.ReactNode;
   children: React.ReactNode;
 }) {
-  const { user, logout } = useAuth();
+  const { user, adminRole, isSuperAdmin, logout } = useAuth();
   const { settings } = useSiteData();
   const { resolvedTheme, toggleTheme } = useTheme();
   const navigate = useNavigate();
@@ -54,7 +109,7 @@ export function AdminLayout({
 
   const navContent = (
     <div className="flex flex-col h-full">
-      <div className="h-16 px-5 flex items-center justify-between border-b border-slate-200 dark:border-slate-800">
+      <div className="h-16 px-5 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 shrink-0">
         <Link to="/admin/dashboard" className="flex items-center gap-2">
           <NexoraLogo
             logoUrl={settings.brandLogoUrl}
@@ -72,34 +127,58 @@ export function AdminLayout({
         </button>
       </div>
 
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        {ADMIN_NAV.map((item) => {
-          const Icon = item.icon;
+      <nav className="flex-1 px-3 py-4 space-y-5 overflow-y-auto">
+        {ADMIN_NAV_SECTIONS.map((section) => {
+          const visibleItems = section.items.filter(
+            (item) => !item.superAdminOnly || isSuperAdmin,
+          );
+          if (visibleItems.length === 0) return null;
           return (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-                  isActive
-                    ? 'bg-blue-600 text-white'
-                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70 hover:text-slate-900 dark:hover:text-white'
-                }`
-              }
-            >
-              <Icon className="h-4 w-4 shrink-0" />
-              <span>{item.label}</span>
-            </NavLink>
+            <div key={section.heading} className="space-y-1">
+              <p className="px-3 text-[11px] font-semibold text-slate-400 dark:text-slate-500">
+                {section.heading}
+              </p>
+              {visibleItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    onClick={() => setSidebarOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                        isActive
+                          ? 'bg-blue-600 text-white'
+                          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70 hover:text-slate-900 dark:hover:text-white'
+                      }`
+                    }
+                  >
+                    <Icon className="h-4 w-4 shrink-0" />
+                    <span>{item.label}</span>
+                  </NavLink>
+                );
+              })}
+            </div>
           );
         })}
       </nav>
 
-      <div className="p-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
-        <div className="text-xs">
-          <p className="font-semibold text-slate-900 dark:text-white truncate">
-            {user?.displayName || 'Administrator'}
-          </p>
+      <div className="p-4 border-t border-slate-200 dark:border-slate-800 space-y-3 shrink-0">
+        <div className="text-xs space-y-0.5">
+          <div className="flex items-center justify-between gap-2">
+            <p className="font-semibold text-slate-900 dark:text-white truncate">
+              {user?.displayName || 'Administrator'}
+            </p>
+            <span
+              className={`text-[11px] font-medium shrink-0 ${
+                isSuperAdmin
+                  ? 'text-blue-600 dark:text-cyan-400'
+                  : 'text-slate-500 dark:text-slate-400'
+              }`}
+            >
+              {adminRole || 'Editor'}
+            </span>
+          </div>
           <p className="text-slate-500 dark:text-slate-400 truncate">
             {user?.email}
           </p>

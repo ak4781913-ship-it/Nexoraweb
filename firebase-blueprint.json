@@ -2,7 +2,7 @@
   "entities": {
     "Product": {
       "title": "Product",
-      "description": "A digital product or platform created under the NEXORA brand.",
+      "description": "A digital product or platform created under the MAWA brand.",
       "type": "object",
       "properties": {
         "name": { "type": "string", "minLength": 2, "maxLength": 120 },
@@ -36,6 +36,12 @@
           "type": "string",
           "enum": ["Draft", "Coming Soon", "Live", "Under Development", "Archived"]
         },
+        "version": { "type": "string", "maxLength": 40 },
+        "releaseDate": { "type": "string", "maxLength": 40 },
+        "demoVideoUrl": { "type": "string", "maxLength": 1000 },
+        "changelog": { "type": "string", "maxLength": 8000 },
+        "downloadUrl": { "type": "string", "maxLength": 1000 },
+        "relatedProductIds": { "type": "array", "description": "Up to 6 related product slugs or IDs" },
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },
@@ -95,7 +101,7 @@
     },
     "UpdatePost": {
       "title": "UpdatePost",
-      "description": "An official announcement, product launch note, or platform update.",
+      "description": "An official MAWA announcement, product launch note, or platform update.",
       "type": "object",
       "properties": {
         "title": { "type": "string", "minLength": 2, "maxLength": 160 },
@@ -126,7 +132,7 @@
     },
     "ContactMessage": {
       "title": "ContactMessage",
-      "description": "A private inquiry submitted via the public contact form.",
+      "description": "A private inquiry submitted via the public contact or business inquiry form.",
       "type": "object",
       "properties": {
         "name": { "type": "string", "minLength": 2, "maxLength": 100 },
@@ -138,20 +144,11 @@
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },
-      "required": [
-        "name",
-        "email",
-        "subject",
-        "message",
-        "status",
-        "honeypot",
-        "createdAt",
-        "updatedAt"
-      ]
+      "required": ["name", "email", "subject", "message", "status", "honeypot", "createdAt", "updatedAt"]
     },
     "SiteSettings": {
       "title": "SiteSettings",
-      "description": "Global NEXORA website branding, metadata, about copy, and public links.",
+      "description": "Global MAWA website branding, metadata, SEO configuration, about copy, and public links.",
       "type": "object",
       "properties": {
         "brandName": { "type": "string", "minLength": 2, "maxLength": 60 },
@@ -170,31 +167,23 @@
         "socialX": { "type": "string", "maxLength": 500 },
         "socialLinkedin": { "type": "string", "maxLength": 500 },
         "socialYoutube": { "type": "string", "maxLength": 500 },
+        "canonicalDomain": { "type": "string", "maxLength": 250 },
+        "ogImageUrl": { "type": "string", "maxLength": 2000 },
+        "gaMeasurementId": { "type": "string", "maxLength": 40 },
+        "aiAssistantEnabled": { "type": "boolean" },
+        "newsletterEnabled": { "type": "boolean" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },
       "required": [
-        "brandName",
-        "tagline",
-        "brandLogoUrl",
-        "brandDescription",
-        "aboutMission",
-        "aboutVision",
-        "aboutStory",
-        "defaultTheme",
-        "seoTitle",
-        "seoDescription",
-        "contactEmail",
-        "contactLocation",
-        "socialGithub",
-        "socialX",
-        "socialLinkedin",
-        "socialYoutube",
-        "updatedAt"
+        "brandName", "tagline", "brandLogoUrl", "brandDescription",
+        "aboutMission", "aboutVision", "aboutStory", "defaultTheme",
+        "seoTitle", "seoDescription", "contactEmail", "contactLocation",
+        "socialGithub", "socialX", "socialLinkedin", "socialYoutube", "updatedAt"
       ]
     },
     "Administrator": {
       "title": "Administrator",
-      "description": "Authorized NEXORA administrator record keyed by Firebase Auth UID.",
+      "description": "Authorized MAWA administrator record keyed by Firebase Auth UID.",
       "type": "object",
       "properties": {
         "email": { "type": "string", "minLength": 5, "maxLength": 150 },
@@ -203,24 +192,174 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["email", "displayName", "role", "createdAt"]
+    },
+    "RoadmapItem": {
+      "title": "RoadmapItem",
+      "description": "Public product roadmap entry managed by MAWA administrators.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "minLength": 2, "maxLength": 160 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "status": { "type": "string", "enum": ["Planned", "Under Consideration", "In Progress", "Completed"] },
+        "category": { "type": "string", "maxLength": 80 },
+        "productSlug": { "type": "string", "maxLength": 120 },
+        "targetQuarter": { "type": "string", "maxLength": 40 },
+        "displayOrder": { "type": "number" },
+        "isPublic": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "description", "status", "category", "productSlug", "targetQuarter", "displayOrder", "isPublic", "createdAt", "updatedAt"]
+    },
+    "ProductReview": {
+      "title": "ProductReview",
+      "description": "Moderated user feedback, rating, and suggestion for a MAWA product.",
+      "type": "object",
+      "properties": {
+        "productId": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "productSlug": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "productName": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "authorName": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "rating": { "type": "number" },
+        "title": { "type": "string", "minLength": 2, "maxLength": 140 },
+        "comment": { "type": "string", "minLength": 5, "maxLength": 2000 },
+        "suggestion": { "type": "string", "maxLength": 1000 },
+        "status": { "type": "string", "enum": ["Pending", "Approved", "Rejected"] },
+        "honeypot": { "type": "string", "maxLength": 0 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["productId", "productSlug", "productName", "authorName", "rating", "title", "comment", "suggestion", "status", "honeypot", "createdAt", "updatedAt"]
+    },
+    "DownloadItem": {
+      "title": "DownloadItem",
+      "description": "Verified official download distribution package or resource.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "minLength": 2, "maxLength": 140 },
+        "productId": { "type": "string", "maxLength": 120 },
+        "productSlug": { "type": "string", "maxLength": 120 },
+        "category": { "type": "string", "enum": ["Windows Application", "Android APK", "Web Application", "Document & Resource"] },
+        "version": { "type": "string", "minLength": 1, "maxLength": 40 },
+        "fileSize": { "type": "string", "maxLength": 40 },
+        "releaseDate": { "type": "string", "maxLength": 40 },
+        "downloadUrl": { "type": "string", "minLength": 8, "maxLength": 1000 },
+        "checksumSha256": { "type": "string", "maxLength": 128 },
+        "releaseNotes": { "type": "string", "maxLength": 2000 },
+        "publicationStatus": { "type": "string", "enum": ["Published", "Draft"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "productId", "productSlug", "category", "version", "fileSize", "releaseDate", "downloadUrl", "checksumSha256", "releaseNotes", "publicationStatus", "createdAt", "updatedAt"]
+    },
+    "NewsletterSubscriber": {
+      "title": "NewsletterSubscriber",
+      "description": "Private newsletter subscription record keyed by hashed email.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "minLength": 5, "maxLength": 150 },
+        "status": { "type": "string", "enum": ["Subscribed", "Unsubscribed"] },
+        "consent": { "type": "boolean" },
+        "source": { "type": "string", "maxLength": 80 },
+        "honeypot": { "type": "string", "maxLength": 0 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "status", "consent", "source", "honeypot", "createdAt", "updatedAt"]
+    },
+    "ActivityLog": {
+      "title": "ActivityLog",
+      "description": "Immutable administrative audit event.",
+      "type": "object",
+      "properties": {
+        "adminUid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "adminEmail": { "type": "string", "minLength": 3, "maxLength": 150 },
+        "adminRole": { "type": "string", "enum": ["Super Admin", "Editor"] },
+        "actionType": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "targetCollection": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "targetId": { "type": "string", "maxLength": 140 },
+        "summary": { "type": "string", "minLength": 2, "maxLength": 400 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["adminUid", "adminEmail", "adminRole", "actionType", "targetCollection", "targetId", "summary", "createdAt"]
+    },
+    "AnalyticsEvent": {
+      "title": "AnalyticsEvent",
+      "description": "Anonymous privacy-safe page view, product view, or download event.",
+      "type": "object",
+      "properties": {
+        "eventType": { "type": "string", "enum": ["page_view", "product_view", "download_click", "ai_query"] },
+        "path": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "productId": { "type": "string", "maxLength": 120 },
+        "productSlug": { "type": "string", "maxLength": 120 },
+        "referrerSource": { "type": "string", "maxLength": 160 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["eventType", "path", "productId", "productSlug", "referrerSource", "createdAt"]
+    },
+    "BackupSnapshot": {
+      "title": "BackupSnapshot",
+      "description": "Super Admin catalog backup snapshot.",
+      "type": "object",
+      "properties": {
+        "label": { "type": "string", "minLength": 2, "maxLength": 140 },
+        "createdByUid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "createdByEmail": { "type": "string", "minLength": 3, "maxLength": 150 },
+        "summary": { "type": "string", "maxLength": 300 },
+        "payloadJson": { "type": "string", "minLength": 2, "maxLength": 750000 },
+        "status": { "type": "string", "enum": ["Ready", "Restored"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["label", "createdByUid", "createdByEmail", "summary", "payloadJson", "status", "createdAt", "updatedAt"]
+    },
+    "RecycleBinItem": {
+      "title": "RecycleBinItem",
+      "description": "Soft-deleted entity snapshot awaiting restore or Super Admin purge.",
+      "type": "object",
+      "properties": {
+        "entityType": { "type": "string", "enum": ["product", "category", "update", "mediaReference"] },
+        "originalId": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "title": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "snapshotJson": { "type": "string", "minLength": 2, "maxLength": 100000 },
+        "deletedByUid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "deletedByEmail": { "type": "string", "minLength": 3, "maxLength": 150 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["entityType", "originalId", "title", "snapshotJson", "deletedByUid", "deletedByEmail", "createdAt"]
+    },
+    "AdminNotification": {
+      "title": "AdminNotification",
+      "description": "Administrative notification feed entry.",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["contact", "review", "newsletter", "security", "system"] },
+        "title": { "type": "string", "minLength": 2, "maxLength": 140 },
+        "message": { "type": "string", "maxLength": 500 },
+        "linkPath": { "type": "string", "maxLength": 160 },
+        "isRead": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["type", "title", "message", "linkPath", "isRead", "createdAt", "updatedAt"]
     }
   },
   "firestore": {
     "/products/{productId}": {
       "schema": { "$ref": "#/entities/Product" },
-      "description": "NEXORA digital products directory."
+      "description": "MAWA digital products directory."
     },
     "/categories/{categoryId}": {
       "schema": { "$ref": "#/entities/Category" },
-      "description": "NEXORA product categories."
+      "description": "MAWA product categories."
     },
     "/updates/{updateId}": {
       "schema": { "$ref": "#/entities/UpdatePost" },
-      "description": "Official NEXORA news, product launches, and announcements."
+      "description": "Official MAWA news, product launches, and announcements."
     },
     "/contactMessages/{messageId}": {
       "schema": { "$ref": "#/entities/ContactMessage" },
-      "description": "Private visitor contact submissions."
+      "description": "Private visitor contact and business inquiries."
     },
     "/siteSettings/{settingId}": {
       "schema": { "$ref": "#/entities/SiteSettings" },
@@ -228,7 +367,43 @@
     },
     "/administrators/{adminId}": {
       "schema": { "$ref": "#/entities/Administrator" },
-      "description": "Authorized platform administrators."
+      "description": "Authorized platform administrators (Super Admin managed)."
+    },
+    "/roadmapItems/{itemId}": {
+      "schema": { "$ref": "#/entities/RoadmapItem" },
+      "description": "Public MAWA innovation roadmap items."
+    },
+    "/productReviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/ProductReview" },
+      "description": "Moderated user feedback and ratings."
+    },
+    "/downloadItems/{downloadId}": {
+      "schema": { "$ref": "#/entities/DownloadItem" },
+      "description": "Official MAWA download center releases."
+    },
+    "/newsletterSubscribers/{subId}": {
+      "schema": { "$ref": "#/entities/NewsletterSubscriber" },
+      "description": "Private newsletter subscriber records keyed by email SHA-256 hash."
+    },
+    "/activityLogs/{logId}": {
+      "schema": { "$ref": "#/entities/ActivityLog" },
+      "description": "Immutable administrative audit logs."
+    },
+    "/analyticsEvents/{eventId}": {
+      "schema": { "$ref": "#/entities/AnalyticsEvent" },
+      "description": "Anonymous public traffic and product view telemetry."
+    },
+    "/backups/{backupId}": {
+      "schema": { "$ref": "#/entities/BackupSnapshot" },
+      "description": "Super Admin catalog backup snapshots."
+    },
+    "/recycleBin/{itemId}": {
+      "schema": { "$ref": "#/entities/RecycleBinItem" },
+      "description": "Soft-deleted records awaiting recovery or permanent purge."
+    },
+    "/adminNotifications/{notifId}": {
+      "schema": { "$ref": "#/entities/AdminNotification" },
+      "description": "Administrative notification feed items."
     }
   }
 }

@@ -10,7 +10,10 @@ import {
   BOOTSTRAP_ADMIN_EMAIL,
   googleProvider,
 } from '../lib/firebase';
-import { getAdministratorProfile } from '../services/firestoreService';
+import {
+  getAdministratorProfile,
+  logAdminActivity,
+} from '../services/firestoreService';
 import type { AdminRole } from '../types/nexora';
 
 interface AuthContextValue {
@@ -82,6 +85,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         );
         return false;
       }
+      void logAdminActivity({
+        actionType: 'ADMIN_SIGN_IN',
+        targetCollection: 'administrators',
+        targetId: cred.user.uid,
+        summary: `Administrator ${cred.user.email ?? cred.user.uid} signed in (${profile.role})`,
+        adminRole: profile.role,
+      });
       return true;
     } catch (err) {
       const message =

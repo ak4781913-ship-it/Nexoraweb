@@ -75,6 +75,13 @@ service cloud.firestore {
       return val is string && val.size() >= 2 && val.size() <= maxLen && val.matches('^[a-z0-9]+(?:-[a-z0-9]+)*$');
     }
 
+    function isSlugOrEmpty(val, maxLen) {
+      return val is string && val.size() <= maxLen && (
+        val.size() == 0 ||
+        val.matches('^[a-z0-9]+(?:-[a-z0-9]+)*$')
+      );
+    }
+
     function isStringList(val, maxItems) {
       return val is list && val.size() <= maxItems && (val.size() == 0 || val[0] is string);
     }
@@ -97,6 +104,7 @@ service cloud.firestore {
         'screenshotGallery', 'categoryId', 'categoryName', 'tags', 'features', 'benefits',
         'officialWebsiteUrl', 'productType', 'pricingType', 'supportedPlatforms', 'launchDate',
         'featured', 'displayOrder', 'seoTitle', 'seoDescription', 'publicationStatus',
+        'version', 'releaseDate', 'demoVideoUrl', 'changelog', 'downloadUrl', 'relatedProductIds',
         'createdAt', 'updatedAt'
       ])
       && isReqStr(data.name, 2, 120)
@@ -121,6 +129,12 @@ service cloud.firestore {
       && isOptStr(data.seoTitle, 140)
       && isOptStr(data.seoDescription, 320)
       && data.publicationStatus in ['Draft', 'Coming Soon', 'Live', 'Under Development', 'Archived']
+      && (!('version' in data) || isOptStr(data.version, 40))
+      && (!('releaseDate' in data) || isOptStr(data.releaseDate, 40))
+      && (!('demoVideoUrl' in data) || isHttpUrlOrEmpty(data.demoVideoUrl, 1000))
+      && (!('changelog' in data) || isOptStr(data.changelog, 8000))
+      && (!('downloadUrl' in data) || isHttpUrlOrEmpty(data.downloadUrl, 1000))
+      && (!('relatedProductIds' in data) || isStringList(data.relatedProductIds, 6))
       && data.createdAt is timestamp
       && data.updatedAt is timestamp;
     }
@@ -196,7 +210,9 @@ service cloud.firestore {
         'brandName', 'tagline', 'brandLogoUrl', 'brandDescription',
         'aboutMission', 'aboutVision', 'aboutStory', 'defaultTheme',
         'seoTitle', 'seoDescription', 'contactEmail', 'contactLocation',
-        'socialGithub', 'socialX', 'socialLinkedin', 'socialYoutube', 'updatedAt'
+        'socialGithub', 'socialX', 'socialLinkedin', 'socialYoutube',
+        'canonicalDomain', 'ogImageUrl', 'gaMeasurementId',
+        'aiAssistantEnabled', 'newsletterEnabled', 'updatedAt'
       ])
       && isReqStr(data.brandName, 2, 60)
       && isOptStr(data.tagline, 200)
@@ -214,6 +230,11 @@ service cloud.firestore {
       && isHttpUrlOrEmpty(data.socialX, 500)
       && isHttpUrlOrEmpty(data.socialLinkedin, 500)
       && isHttpUrlOrEmpty(data.socialYoutube, 500)
+      && (!('canonicalDomain' in data) || isHttpUrlOrEmpty(data.canonicalDomain, 250))
+      && (!('ogImageUrl' in data) || isAssetUrlOrEmpty(data.ogImageUrl, 2000))
+      && (!('gaMeasurementId' in data) || isOptStr(data.gaMeasurementId, 40))
+      && (!('aiAssistantEnabled' in data) || data.aiAssistantEnabled is bool)
+      && (!('newsletterEnabled' in data) || data.newsletterEnabled is bool)
       && data.updatedAt is timestamp;
     }
 
@@ -225,6 +246,180 @@ service cloud.firestore {
       && isReqStr(data.displayName, 1, 100)
       && data.role in ['Super Admin', 'Editor']
       && data.createdAt is timestamp;
+    }
+
+    function isValidRoadmapItem(data) {
+      return data.keys().hasAll([
+        'title', 'description', 'status', 'category', 'productSlug',
+        'targetQuarter', 'displayOrder', 'isPublic', 'createdAt', 'updatedAt'
+      ])
+      && data.keys().hasOnly([
+        'title', 'description', 'status', 'category', 'productSlug',
+        'targetQuarter', 'displayOrder', 'isPublic', 'createdAt', 'updatedAt'
+      ])
+      && isReqStr(data.title, 2, 160)
+      && isOptStr(data.description, 2000)
+      && data.status in ['Planned', 'Under Consideration', 'In Progress', 'Completed']
+      && isOptStr(data.category, 80)
+      && isSlugOrEmpty(data.productSlug, 120)
+      && isOptStr(data.targetQuarter, 40)
+      && (data.displayOrder is int || data.displayOrder is float) && data.displayOrder >= 0 && data.displayOrder <= 100000
+      && data.isPublic is bool
+      && data.createdAt is timestamp
+      && data.updatedAt is timestamp;
+    }
+
+    function isValidProductReview(data) {
+      return data.keys().hasAll([
+        'productId', 'productSlug', 'productName', 'authorName', 'rating',
+        'title', 'comment', 'suggestion', 'status', 'honeypot', 'createdAt', 'updatedAt'
+      ])
+      && data.keys().hasOnly([
+        'productId', 'productSlug', 'productName', 'authorName', 'rating',
+        'title', 'comment', 'suggestion', 'status', 'honeypot', 'createdAt', 'updatedAt'
+      ])
+      && isReqStr(data.productId, 1, 120)
+      && isSlug(data.productSlug, 120)
+      && isReqStr(data.productName, 1, 120)
+      && isReqStr(data.authorName, 2, 80)
+      && (data.rating is int || data.rating is float) && data.rating >= 1 && data.rating <= 5
+      && isReqStr(data.title, 2, 140)
+      && isReqStr(data.comment, 5, 2000)
+      && isOptStr(data.suggestion, 1000)
+      && data.status in ['Pending', 'Approved', 'Rejected']
+      && data.honeypot is string && data.honeypot.size() == 0
+      && data.createdAt is timestamp
+      && data.updatedAt is timestamp;
+    }
+
+    function isValidDownloadItem(data) {
+      return data.keys().hasAll([
+        'title', 'productId', 'productSlug', 'category', 'version', 'fileSize',
+        'releaseDate', 'downloadUrl', 'checksumSha256', 'releaseNotes',
+        'publicationStatus', 'createdAt', 'updatedAt'
+      ])
+      && data.keys().hasOnly([
+        'title', 'productId', 'productSlug', 'category', 'version', 'fileSize',
+        'releaseDate', 'downloadUrl', 'checksumSha256', 'releaseNotes',
+        'publicationStatus', 'createdAt', 'updatedAt'
+      ])
+      && isReqStr(data.title, 2, 140)
+      && isOptStr(data.productId, 120)
+      && isSlugOrEmpty(data.productSlug, 120)
+      && data.category in ['Windows Application', 'Android APK', 'Web Application', 'Document & Resource']
+      && isReqStr(data.version, 1, 40)
+      && isOptStr(data.fileSize, 40)
+      && isOptStr(data.releaseDate, 40)
+      && isHttpUrlOrEmpty(data.downloadUrl, 1000) && data.downloadUrl.size() >= 8
+      && isOptStr(data.checksumSha256, 128)
+      && isOptStr(data.releaseNotes, 2000)
+      && data.publicationStatus in ['Published', 'Draft']
+      && data.createdAt is timestamp
+      && data.updatedAt is timestamp;
+    }
+
+    function isValidNewsletterSubscriber(data) {
+      return data.keys().hasAll([
+        'email', 'status', 'consent', 'source', 'honeypot', 'createdAt', 'updatedAt'
+      ])
+      && data.keys().hasOnly([
+        'email', 'status', 'consent', 'source', 'honeypot', 'createdAt', 'updatedAt'
+      ])
+      && isReqStr(data.email, 5, 150)
+      && data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
+      && data.status in ['Subscribed', 'Unsubscribed']
+      && data.consent is bool
+      && isOptStr(data.source, 80)
+      && data.honeypot is string && data.honeypot.size() == 0
+      && data.createdAt is timestamp
+      && data.updatedAt is timestamp;
+    }
+
+    function isValidActivityLog(data) {
+      return data.keys().hasAll([
+        'adminUid', 'adminEmail', 'adminRole', 'actionType',
+        'targetCollection', 'targetId', 'summary', 'createdAt'
+      ])
+      && data.keys().hasOnly([
+        'adminUid', 'adminEmail', 'adminRole', 'actionType',
+        'targetCollection', 'targetId', 'summary', 'createdAt'
+      ])
+      && isReqStr(data.adminUid, 1, 128)
+      && isReqStr(data.adminEmail, 3, 150)
+      && data.adminRole in ['Super Admin', 'Editor']
+      && isReqStr(data.actionType, 2, 80)
+      && isReqStr(data.targetCollection, 1, 80)
+      && isOptStr(data.targetId, 140)
+      && isReqStr(data.summary, 2, 400)
+      && data.createdAt is timestamp;
+    }
+
+    function isValidAnalyticsEvent(data) {
+      return data.keys().hasAll([
+        'eventType', 'path', 'productId', 'productSlug', 'referrerSource', 'createdAt'
+      ])
+      && data.keys().hasOnly([
+        'eventType', 'path', 'productId', 'productSlug', 'referrerSource', 'createdAt'
+      ])
+      && data.eventType in ['page_view', 'product_view', 'download_click', 'ai_query']
+      && isReqStr(data.path, 1, 200)
+      && isOptStr(data.productId, 120)
+      && isOptStr(data.productSlug, 120)
+      && isOptStr(data.referrerSource, 160)
+      && data.createdAt is timestamp;
+    }
+
+    function isValidBackupSnapshot(data) {
+      return data.keys().hasAll([
+        'label', 'createdByUid', 'createdByEmail', 'summary',
+        'payloadJson', 'status', 'createdAt', 'updatedAt'
+      ])
+      && data.keys().hasOnly([
+        'label', 'createdByUid', 'createdByEmail', 'summary',
+        'payloadJson', 'status', 'createdAt', 'updatedAt'
+      ])
+      && isReqStr(data.label, 2, 140)
+      && isReqStr(data.createdByUid, 1, 128)
+      && isReqStr(data.createdByEmail, 3, 150)
+      && isOptStr(data.summary, 300)
+      && isReqStr(data.payloadJson, 2, 750000)
+      && data.status in ['Ready', 'Restored']
+      && data.createdAt is timestamp
+      && data.updatedAt is timestamp;
+    }
+
+    function isValidRecycleBinItem(data) {
+      return data.keys().hasAll([
+        'entityType', 'originalId', 'title', 'snapshotJson',
+        'deletedByUid', 'deletedByEmail', 'createdAt'
+      ])
+      && data.keys().hasOnly([
+        'entityType', 'originalId', 'title', 'snapshotJson',
+        'deletedByUid', 'deletedByEmail', 'createdAt'
+      ])
+      && data.entityType in ['product', 'category', 'update', 'mediaReference']
+      && isReqStr(data.originalId, 1, 160)
+      && isReqStr(data.title, 1, 160)
+      && isReqStr(data.snapshotJson, 2, 100000)
+      && isReqStr(data.deletedByUid, 1, 128)
+      && isReqStr(data.deletedByEmail, 3, 150)
+      && data.createdAt is timestamp;
+    }
+
+    function isValidAdminNotification(data) {
+      return data.keys().hasAll([
+        'type', 'title', 'message', 'linkPath', 'isRead', 'createdAt', 'updatedAt'
+      ])
+      && data.keys().hasOnly([
+        'type', 'title', 'message', 'linkPath', 'isRead', 'createdAt', 'updatedAt'
+      ])
+      && data.type in ['contact', 'review', 'newsletter', 'security', 'system']
+      && isReqStr(data.title, 2, 140)
+      && isOptStr(data.message, 500)
+      && isOptStr(data.linkPath, 160)
+      && data.isRead is bool
+      && data.createdAt is timestamp
+      && data.updatedAt is timestamp;
     }
 
     // Collection: products
@@ -245,9 +440,11 @@ service cloud.firestore {
           'name', 'slug', 'shortDescription', 'fullDescription', 'logoUrl', 'coverImageUrl',
           'screenshotGallery', 'categoryId', 'categoryName', 'tags', 'features', 'benefits',
           'officialWebsiteUrl', 'productType', 'pricingType', 'supportedPlatforms', 'launchDate',
-          'featured', 'displayOrder', 'seoTitle', 'seoDescription', 'publicationStatus', 'updatedAt'
+          'featured', 'displayOrder', 'seoTitle', 'seoDescription', 'publicationStatus',
+          'version', 'releaseDate', 'demoVideoUrl', 'changelog', 'downloadUrl', 'relatedProductIds',
+          'updatedAt'
         ]);
-      allow delete: if isAdmin() && isValidId(productId);
+      allow delete: if isSuperAdmin() && isValidId(productId);
     }
 
     // Collection: categories
@@ -267,7 +464,7 @@ service cloud.firestore {
         && incoming().diff(existing()).affectedKeys().hasOnly([
           'name', 'slug', 'icon', 'imageUrl', 'description', 'displayOrder', 'publicationStatus', 'updatedAt'
         ]);
-      allow delete: if isAdmin() && isValidId(categoryId);
+      allow delete: if isSuperAdmin() && isValidId(categoryId);
     }
 
     // Collection: updates
@@ -288,7 +485,7 @@ service cloud.firestore {
           'title', 'slug', 'summary', 'content', 'type', 'relatedProductSlug',
           'coverImageUrl', 'publishedAt', 'publicationStatus', 'updatedAt'
         ]);
-      allow delete: if isAdmin() && isValidId(updateId);
+      allow delete: if isSuperAdmin() && isValidId(updateId);
     }
 
     // Collection: contactMessages (strict PII isolation)
@@ -306,25 +503,25 @@ service cloud.firestore {
         && incoming().createdAt == existing().createdAt
         && incoming().updatedAt == request.time
         && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']);
-      allow delete: if isAdmin() && isValidId(messageId);
+      allow delete: if isSuperAdmin() && isValidId(messageId);
     }
 
-    // Collection: siteSettings
+    // Collection: siteSettings (critical configuration - Super Admin only for writes)
     match /siteSettings/{settingId} {
       allow get: if isValidId(settingId) && (settingId == 'global' || isAdmin());
       allow list: if isAdmin();
-      allow create: if isAdmin()
+      allow create: if isSuperAdmin()
         && settingId == 'global'
         && isValidSiteSettings(incoming())
         && incoming().updatedAt == request.time;
-      allow update: if isAdmin()
+      allow update: if isSuperAdmin()
         && settingId == 'global'
         && isValidSiteSettings(incoming())
         && incoming().updatedAt == request.time;
       allow delete: if false;
     }
 
-    // Collection: administrators (RBAC roster - Super Admin managed only, never self-creatable)
+    // Collection: administrators (Super Admin managed only, never self-creatable)
     match /administrators/{adminId} {
       allow get: if isValidId(adminId) && (isAdmin() || (isVerified() && adminId == request.auth.uid));
       allow list: if isAdmin();
@@ -338,6 +535,172 @@ service cloud.firestore {
         && incoming().createdAt == existing().createdAt
         && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'role']);
       allow delete: if isSuperAdmin() && isValidId(adminId);
+    }
+
+    // Collection: roadmapItems
+    match /roadmapItems/{itemId} {
+      allow get: if isValidId(itemId) && (existing().isPublic == true || isAdmin());
+      allow list: if existing().isPublic == true || isAdmin();
+      allow create: if isAdmin()
+        && isValidId(itemId)
+        && isValidRoadmapItem(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isAdmin()
+        && isValidId(itemId)
+        && isValidRoadmapItem(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'title', 'description', 'status', 'category', 'productSlug',
+          'targetQuarter', 'displayOrder', 'isPublic', 'updatedAt'
+        ]);
+      allow delete: if isSuperAdmin() && isValidId(itemId);
+    }
+
+    // Collection: productReviews (public creates strictly Pending; only Approved is publicly readable)
+    match /productReviews/{reviewId} {
+      allow get: if isValidId(reviewId) && (existing().status == 'Approved' || isAdmin());
+      allow list: if existing().status == 'Approved' || isAdmin();
+      allow create: if isValidId(reviewId)
+        && isValidProductReview(incoming())
+        && incoming().status == 'Pending'
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isAdmin()
+        && isValidId(reviewId)
+        && isValidProductReview(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']);
+      allow delete: if isSuperAdmin() && isValidId(reviewId);
+    }
+
+    // Collection: downloadItems
+    match /downloadItems/{downloadId} {
+      allow get: if isValidId(downloadId) && (existing().publicationStatus == 'Published' || isAdmin());
+      allow list: if existing().publicationStatus == 'Published' || isAdmin();
+      allow create: if isAdmin()
+        && isValidId(downloadId)
+        && isValidDownloadItem(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isAdmin()
+        && isValidId(downloadId)
+        && isValidDownloadItem(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'title', 'productId', 'productSlug', 'category', 'version', 'fileSize',
+          'releaseDate', 'downloadUrl', 'checksumSha256', 'releaseNotes',
+          'publicationStatus', 'updatedAt'
+        ]);
+      allow delete: if isSuperAdmin() && isValidId(downloadId);
+    }
+
+    // Collection: newsletterSubscribers (strict PII isolation; hashed ID for self-unsubscribe without reads)
+    match /newsletterSubscribers/{subId} {
+      allow get: if isValidId(subId) && isAdmin();
+      allow list: if isAdmin();
+      allow create: if isValidId(subId)
+        && subId.matches('^sub_[a-f0-9]{16,64}$')
+        && isValidNewsletterSubscriber(incoming())
+        && incoming().consent == true
+        && incoming().status == 'Subscribed'
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(subId) && isValidNewsletterSubscriber(incoming()) && (
+        (
+          isAdmin()
+          && incoming().createdAt == existing().createdAt
+          && incoming().updatedAt == request.time
+          && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt'])
+        ) || (
+          subId.matches('^sub_[a-f0-9]{16,64}$')
+          && incoming().email == existing().email
+          && incoming().createdAt == existing().createdAt
+          && incoming().updatedAt == request.time
+          && (
+            (incoming().status == 'Unsubscribed' && incoming().consent == existing().consent && incoming().source == existing().source) ||
+            (incoming().status == 'Subscribed' && incoming().consent == true && incoming().honeypot.size() == 0)
+          )
+          && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'consent', 'source', 'updatedAt'])
+        )
+      );
+      allow delete: if isSuperAdmin() && isValidId(subId);
+    }
+
+    // Collection: activityLogs (append-only audit trail)
+    match /activityLogs/{logId} {
+      allow get: if isValidId(logId) && isAdmin();
+      allow list: if isAdmin();
+      allow create: if isAdmin()
+        && isValidId(logId)
+        && isValidActivityLog(incoming())
+        && incoming().adminUid == request.auth.uid
+        && incoming().createdAt == request.time;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // Collection: analyticsEvents (anonymous non-PII traffic telemetry)
+    match /analyticsEvents/{eventId} {
+      allow get: if isValidId(eventId) && isAdmin();
+      allow list: if isAdmin();
+      allow create: if isValidId(eventId)
+        && isValidAnalyticsEvent(incoming())
+        && incoming().createdAt == request.time;
+      allow update: if false;
+      allow delete: if isSuperAdmin() && isValidId(eventId);
+    }
+
+    // Collection: backups (strict Super Admin only)
+    match /backups/{backupId} {
+      allow get: if isValidId(backupId) && isSuperAdmin();
+      allow list: if isSuperAdmin();
+      allow create: if isSuperAdmin()
+        && isValidId(backupId)
+        && isValidBackupSnapshot(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isSuperAdmin()
+        && isValidId(backupId)
+        && isValidBackupSnapshot(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']);
+      allow delete: if isSuperAdmin() && isValidId(backupId);
+    }
+
+    // Collection: recycleBin (Admin soft-delete & recovery; Super Admin permanent purge)
+    match /recycleBin/{itemId} {
+      allow get: if isValidId(itemId) && isAdmin();
+      allow list: if isAdmin();
+      allow create: if isAdmin()
+        && isValidId(itemId)
+        && isValidRecycleBinItem(incoming())
+        && incoming().deletedByUid == request.auth.uid
+        && incoming().createdAt == request.time;
+      allow update: if false;
+      allow delete: if isSuperAdmin() && isValidId(itemId);
+    }
+
+    // Collection: adminNotifications
+    match /adminNotifications/{notifId} {
+      allow get: if isValidId(notifId) && isAdmin();
+      allow list: if isAdmin();
+      allow create: if isAdmin()
+        && isValidId(notifId)
+        && isValidAdminNotification(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isAdmin()
+        && isValidId(notifId)
+        && isValidAdminNotification(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['isRead', 'updatedAt']);
+      allow delete: if isSuperAdmin() && isValidId(notifId);
     }
   }
 }

@@ -38,7 +38,9 @@
     <script>
       (function () {
         try {
-          var pref = localStorage.getItem('nexora_theme_preference');
+          var pref =
+            localStorage.getItem('mawa_theme_preference') ||
+            localStorage.getItem('nexora_theme_preference');
           var isDark =
             pref === 'dark' ||
             ((pref === 'system' || !pref) &&

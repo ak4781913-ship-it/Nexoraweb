@@ -1,17 +1,22 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
+  ArrowRight,
   ChevronLeft,
   ChevronRight,
   RotateCcw,
+  Scale,
   Search,
   SlidersHorizontal,
+  Sparkles,
+  X,
 } from 'lucide-react';
 import { SeoHead } from '../components/common/SeoHead';
 import { ProductCard } from '../components/products/ProductCard';
 import { useSiteData } from '../context/SiteDataContext';
 import type {
   PricingType,
+  Product,
   ProductType,
   PublicationStatus,
 } from '../types/nexora';
@@ -42,7 +47,7 @@ const PRODUCT_TYPES: Array<'All' | ProductType> = [
   'Website',
 ];
 
-type SortOption = 'order' | 'latest' | 'az';
+type SortOption = 'order' | 'featured' | 'latest' | 'az';
 
 export function ProductsPage() {
   const { products, categories, loading } = useSiteData();
@@ -58,9 +63,13 @@ export function ProductsPage() {
     'All',
   );
   const [typeFilter, setTypeFilter] = useState<'All' | ProductType>('All');
+  const [platformFilter, setPlatformFilter] = useState<string>('All');
   const [featuredOnly, setFeaturedOnly] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('order');
   const [currentPage, setCurrentPage] = useState(1);
+
+  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [compareModalOpen, setCompareModalOpen] = useState(false);
 
   useEffect(() => {
     const paramQ = searchParams.get('q') || '';
@@ -75,9 +84,25 @@ export function ProductsPage() {
     pricingFilter,
     statusFilter,
     typeFilter,
+    platformFilter,
     featuredOnly,
     sortBy,
   ]);
+
+  const availablePlatforms = useMemo(() => {
+    const set = new Set<string>(['Web', 'Mobile Web', 'Desktop', 'Windows', 'Android']);
+    products.forEach((p) =>
+      p.supportedPlatforms.forEach((plat) => {
+        if (plat.trim()) set.add(plat.trim());
+      }),
+    );
+    return ['All', ...Array.from(set)];
+  }, [products]);
+
+  const spotlightProduct = useMemo(
+    () => products.find((p) => p.featured) || products[0] || null,
+    [products],
+  );
 
   const handleQueryChange = (value: string) => {
     setQueryText(value);
@@ -94,6 +119,7 @@ export function ProductsPage() {
     setPricingFilter('All');
     setStatusFilter('All');
     setTypeFilter('All');
+    setPlatformFilter('All');
     setFeaturedOnly(false);
     setSortBy('order');
     setSearchParams({}, { replace: true });
@@ -105,6 +131,7 @@ export function ProductsPage() {
     pricingFilter !== 'All' ||
     statusFilter !== 'All' ||
     typeFilter !== 'All' ||
+    platformFilter !== 'All' ||
     featuredOnly;
 
   const filteredProducts = useMemo(() => {
@@ -123,6 +150,14 @@ export function ProductsPage() {
         return false;
       }
       if (typeFilter !== 'All' && p.productType !== typeFilter) {
+        return false;
+      }
+      if (
+        platformFilter !== 'All' &&
+        !p.supportedPlatforms.some(
+          (plat) => plat.toLowerCase() === platformFilter.toLowerCase(),
+        )
+      ) {
         return false;
       }
       if (featuredOnly && !p.featured) {
@@ -145,12 +180,16 @@ export function ProductsPage() {
     });
 
     return [...list].sort((a, b) => {
+      if (sortBy === 'featured') {
+        if (a.featured !== b.featured) return a.featured ? -1 : 1;
+        return a.displayOrder - b.displayOrder;
+      }
       if (sortBy === 'az') {
         return a.name.localeCompare(b.name);
       }
       if (sortBy === 'latest') {
-        const dateA = a.launchDate || '';
-        const dateB = b.launchDate || '';
+        const dateA = a.releaseDate || a.launchDate || '';
+        const dateB = b.releaseDate || b.launchDate || '';
         return dateB.localeCompare(dateA) || a.displayOrder - b.displayOrder;
       }
       return a.displayOrder - b.displayOrder;
@@ -162,6 +201,7 @@ export function ProductsPage() {
     pricingFilter,
     statusFilter,
     typeFilter,
+    platformFilter,
     featuredOnly,
     sortBy,
   ]);
@@ -172,6 +212,26 @@ export function ProductsPage() {
     const start = (safePage - 1) * PAGE_SIZE;
     return filteredProducts.slice(start, start + PAGE_SIZE);
   }, [filteredProducts, safePage]);
+
+  const comparedProducts = useMemo(
+    () =>
+      compareIds
+        .map((id) => products.find((p) => p.id === id))
+        .filter((p): p is Product => Boolean(p)),
+    [compareIds, products],
+  );
+
+  const toggleCompare = (product: Product) => {
+    setCompareIds((prev) => {
+      if (prev.includes(product.id)) {
+        return prev.filter((id) => id !== product.id);
+      }
+      if (prev.length >= 3) {
+        return [...prev.slice(1), product.id];
+      }
+      return [...prev, product.id];
+    });
+  };
 
   const goToPage = (page: number) => {
     const clamped = Math.max(1, Math.min(page, totalPages));
@@ -188,17 +248,36 @@ export function ProductsPage() {
       />
 
       <section className="border-b border-slate-200 dark:border-slate-800/80 bg-slate-50/70 dark:bg-[#080F22] py-12 sm:py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-xs font-semibold tracking-wider uppercase text-blue-600 dark:text-cyan-400">
-            MAWA Directory
-          </p>
-          <h1 className="mt-2 font-display text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Digital Products &amp; Platforms
-          </h1>
-          <p className="mt-3 text-base text-slate-600 dark:text-slate-300 max-w-2xl">
-            Explore all publicly released and upcoming software applications, AI
-            tools, and online services created by MAWA.
-          </p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <p className="text-xs font-semibold tracking-wider uppercase text-blue-600 dark:text-cyan-400">
+              MAWA Directory
+            </p>
+            <h1 className="mt-2 font-display text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
+              Digital Products &amp; Platforms
+            </h1>
+            <p className="mt-3 text-base text-slate-600 dark:text-slate-300 max-w-2xl">
+              Explore all publicly released and upcoming software applications, AI
+              tools, and online services created by MAWA.
+            </p>
+          </div>
+          {spotlightProduct && (
+            <Link
+              to={`/products/${spotlightProduct.slug}`}
+              className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0B1326] p-4 max-w-sm hover:border-blue-500 transition-colors shrink-0"
+            >
+              <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-blue-600 dark:text-cyan-400">
+                <Sparkles className="h-3.5 w-3.5" />
+                Featured Spotlight
+              </p>
+              <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">
+                {spotlightProduct.name}
+              </p>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
+                {spotlightProduct.shortDescription}
+              </p>
+            </Link>
+          )}
         </div>
       </section>
 
@@ -206,8 +285,8 @@ export function ProductsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
           {/* Search and Filter Controls */}
           <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0B1326] p-5 space-y-5">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
-              <div className="lg:col-span-5 relative">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3.5 items-center">
+              <div className="sm:col-span-2 lg:col-span-4 relative">
                 <Search className="h-4 w-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="search"
@@ -219,12 +298,12 @@ export function ProductsPage() {
                 />
               </div>
 
-              <div className="lg:col-span-3">
+              <div className="lg:col-span-2">
                 <select
                   aria-label="Filter by category"
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] text-slate-900 dark:text-white focus:outline-none focus:border-blue-600"
+                  className="w-full px-3 py-2.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] text-slate-900 dark:text-white focus:outline-none focus:border-blue-600"
                 >
                   <option value="All">All Categories</option>
                   {categories.map((cat) => (
@@ -242,7 +321,7 @@ export function ProductsPage() {
                   onChange={(e) =>
                     setTypeFilter(e.target.value as 'All' | ProductType)
                   }
-                  className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] text-slate-900 dark:text-white focus:outline-none focus:border-blue-600"
+                  className="w-full px-3 py-2.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] text-slate-900 dark:text-white focus:outline-none focus:border-blue-600"
                 >
                   {PRODUCT_TYPES.map((t) => (
                     <option key={t} value={t}>
@@ -254,12 +333,28 @@ export function ProductsPage() {
 
               <div className="lg:col-span-2">
                 <select
+                  aria-label="Filter by platform"
+                  value={platformFilter}
+                  onChange={(e) => setPlatformFilter(e.target.value)}
+                  className="w-full px-3 py-2.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] text-slate-900 dark:text-white focus:outline-none focus:border-blue-600"
+                >
+                  {availablePlatforms.map((plat) => (
+                    <option key={plat} value={plat}>
+                      {plat === 'All' ? 'All Platforms' : plat}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="lg:col-span-2">
+                <select
                   aria-label="Sort products"
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortOption)}
-                  className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] text-slate-900 dark:text-white focus:outline-none focus:border-blue-600"
+                  className="w-full px-3 py-2.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#060B19] text-slate-900 dark:text-white focus:outline-none focus:border-blue-600"
                 >
                   <option value="order">Sort: Curated Order</option>
+                  <option value="featured">Sort: Featured First</option>
                   <option value="latest">Sort: Latest Releases</option>
                   <option value="az">Sort: A to Z</option>
                 </select>
@@ -358,7 +453,12 @@ export function ProductsPage() {
             <div className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {paginatedProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    isCompared={compareIds.includes(product.id)}
+                    onToggleCompare={toggleCompare}
+                  />
                 ))}
               </div>
 
@@ -449,6 +549,138 @@ export function ProductsPage() {
           )}
         </div>
       </section>
+
+      {/* Compare Tray */}
+      {comparedProducts.length > 0 && (
+        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-30 w-[calc(100vw-2rem)] max-w-xl rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0C1428] p-3.5 shadow-2xl flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <Scale className="h-4 w-4 text-blue-600 dark:text-cyan-400 shrink-0" />
+            <span className="text-xs font-semibold text-slate-900 dark:text-white truncate">
+              Compare ({comparedProducts.length}/3):{' '}
+              <span className="font-normal text-slate-600 dark:text-slate-300">
+                {comparedProducts.map((p) => p.name).join(', ')}
+              </span>
+            </span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => setCompareIds([])}
+              className="px-2.5 py-1.5 text-xs text-slate-500 hover:text-slate-800 dark:hover:text-white"
+            >
+              Clear
+            </button>
+            <button
+              type="button"
+              onClick={() => setCompareModalOpen(true)}
+              className="inline-flex items-center gap-1 px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+            >
+              Compare Now
+              <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Comparison Modal */}
+      {compareModalOpen && comparedProducts.length > 0 && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Compare MAWA Products"
+          onClick={() => setCompareModalOpen(false)}
+        >
+          <div
+            className="w-full max-w-5xl max-h-[85vh] overflow-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0B1326] p-6 space-y-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="font-display text-xl font-bold text-slate-900 dark:text-white">
+                MAWA Product Comparison
+              </h2>
+              <button
+                type="button"
+                onClick={() => setCompareModalOpen(false)}
+                aria-label="Close comparison"
+                className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200 dark:border-slate-800">
+                    <th className="py-3 pr-4 text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      Specification
+                    </th>
+                    {comparedProducts.map((p) => (
+                      <th key={p.id} className="py-3 px-4 font-semibold text-slate-900 dark:text-white">
+                        {p.name}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-xs sm:text-sm">
+                  <tr>
+                    <td className="py-3 pr-4 font-medium text-slate-500 dark:text-slate-400">
+                      Category
+                    </td>
+                    {comparedProducts.map((p) => (
+                      <td key={p.id} className="py-3 px-4">{p.categoryName}</td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td className="py-3 pr-4 font-medium text-slate-500 dark:text-slate-400">
+                      Format
+                    </td>
+                    {comparedProducts.map((p) => (
+                      <td key={p.id} className="py-3 px-4">{p.productType}</td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td className="py-3 pr-4 font-medium text-slate-500 dark:text-slate-400">
+                      Pricing
+                    </td>
+                    {comparedProducts.map((p) => (
+                      <td key={p.id} className="py-3 px-4">{p.pricingType}</td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td className="py-3 pr-4 font-medium text-slate-500 dark:text-slate-400">
+                      Status
+                    </td>
+                    {comparedProducts.map((p) => (
+                      <td key={p.id} className="py-3 px-4">{p.publicationStatus}</td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td className="py-3 pr-4 font-medium text-slate-500 dark:text-slate-400">
+                      Platforms
+                    </td>
+                    {comparedProducts.map((p) => (
+                      <td key={p.id} className="py-3 px-4">
+                        {p.supportedPlatforms.join(', ') || 'Web'}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td className="py-3 pr-4 font-medium text-slate-500 dark:text-slate-400">
+                      Key Highlights
+                    </td>
+                    {comparedProducts.map((p) => (
+                      <td key={p.id} className="py-3 px-4 text-slate-600 dark:text-slate-300">
+                        {p.features.slice(0, 3).join(' · ') || p.shortDescription}
+                      </td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
